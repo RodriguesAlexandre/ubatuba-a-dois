@@ -4998,28 +4998,69 @@
 
   document.getElementById('createTripBtn')?.addEventListener('click',async()=>{
     if(!sbSession||!sb){toast('Entre com Google primeiro');return;}
-    const {data,error}=await sb.rpc('create_shared_trip',{trip_name:'Ubatuba a Dois • 10–12/10/2026'});
-    if(error){toast('Erro ao criar viagem');console.error(error);return;}
-    activeTrip={id:data.trip_id,code:data.invite_code};
-    saveJSON(ACTIVE_TRIP_KEY,activeTrip);
-    await saveCloudState(true);
-    subscribeRealtime();
-    renderCloudStatus();renderTripModal();
-    toast('Viagem compartilhada criada');
+    const btn=document.getElementById('createTripBtn');
+    const oldText=btn?.querySelector('strong')?.textContent || 'Criar esta viagem';
+    if(btn){btn.disabled=true;btn.style.opacity='.65';}
+    try{
+      const {data,error}=await sb.rpc('create_shared_trip',{trip_name:'Ubatuba a Dois • 10–12/10/2026'});
+      if(error){
+        console.error('create_shared_trip:',error);
+        toast('Erro ao criar viagem: '+(error.message||'ver console'));
+        return;
+      }
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row?.trip_id || !row?.invite_code){
+        console.error('Resposta inesperada de create_shared_trip:',data);
+        toast('Viagem criada, mas a resposta veio em formato inesperado');
+        return;
+      }
+      activeTrip={id:row.trip_id,code:row.invite_code};
+      saveJSON(ACTIVE_TRIP_KEY,activeTrip);
+      await saveCloudState(true);
+      subscribeRealtime();
+      renderCloudStatus();
+      renderTripModal();
+      toast('Viagem compartilhada criada');
+    }catch(err){
+      console.error(err);
+      toast('Falha ao criar viagem');
+    }finally{
+      if(btn){btn.disabled=false;btn.style.opacity='';}
+    }
   });
 
   document.getElementById('joinTripBtn')?.addEventListener('click',async()=>{
     if(!sbSession||!sb){toast('Entre com Google primeiro');return;}
     const code=document.getElementById('tripCodeInput').value.trim().toUpperCase();
-    if(!code)return;
-    const {data,error}=await sb.rpc('join_shared_trip',{invite_code_input:code});
-    if(error){toast('Código inválido ou acesso negado');console.error(error);return;}
-    activeTrip={id:data.trip_id,code:data.invite_code};
-    saveJSON(ACTIVE_TRIP_KEY,activeTrip);
-    await loadCloudState(true);
-    subscribeRealtime();
-    renderCloudStatus();renderTripModal();
-    toast('Você entrou na viagem');
+    if(!code){toast('Digite o código da viagem');return;}
+    const btn=document.getElementById('joinTripBtn');
+    if(btn){btn.disabled=true;btn.style.opacity='.65';}
+    try{
+      const {data,error}=await sb.rpc('join_shared_trip',{invite_code_input:code});
+      if(error){
+        console.error('join_shared_trip:',error);
+        toast('Código inválido ou acesso negado');
+        return;
+      }
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row?.trip_id || !row?.invite_code){
+        console.error('Resposta inesperada de join_shared_trip:',data);
+        toast('Resposta inesperada ao entrar na viagem');
+        return;
+      }
+      activeTrip={id:row.trip_id,code:row.invite_code};
+      saveJSON(ACTIVE_TRIP_KEY,activeTrip);
+      await loadCloudState(true);
+      subscribeRealtime();
+      renderCloudStatus();
+      renderTripModal();
+      toast('Você entrou na viagem');
+    }catch(err){
+      console.error(err);
+      toast('Falha ao entrar na viagem');
+    }finally{
+      if(btn){btn.disabled=false;btn.style.opacity='';}
+    }
   });
 
   document.getElementById('copyTripCode')?.addEventListener('click',async()=>{
