@@ -4465,6 +4465,7 @@
 <label class="modal-field">
 <span>Código da viagem</span>
 <input autocomplete="off" id="tripCodeInput" maxlength="12" placeholder="Ex.: A7K9P2" type="text"/>
+<p id="tripJoinError" role="alert" hidden style="color:#ffb4ab;white-space:pre-wrap;overflow-wrap:anywhere"></p>
 </label>
 <div class="modal-actions">
 <button class="modal-btn subtle" id="tripJoinBack" type="button">Voltar</button>
@@ -5059,7 +5060,10 @@
 
   document.getElementById('joinTripBtn')?.addEventListener('click',async()=>{
     if(!sbSession||!sb){toast('Entre com Google primeiro');return;}
-    const code=document.getElementById('tripCodeInput').value.trim().toUpperCase();
+    const code=document.getElementById('tripCodeInput').value.replace(/\s+/g,'').toUpperCase();
+    const errorBox=document.getElementById('tripJoinError');
+    errorBox.hidden=true;
+    errorBox.textContent='';
     if(!code){toast('Digite o código da viagem');return;}
     const btn=document.getElementById('joinTripBtn');
     if(btn){btn.disabled=true;btn.style.opacity='.65';}
@@ -5067,7 +5071,10 @@
       const {data,error}=await sb.rpc('join_shared_trip',{invite_code_input:code});
       if(error){
         console.error('join_shared_trip:',error);
-        toast('Código inválido ou acesso negado');
+        const message='Não foi possível entrar: '+(error.message||'Erro do servidor')+(error.code?' (código '+error.code+')':'');
+        errorBox.textContent=message;
+        errorBox.hidden=false;
+        toast('Veja o motivo abaixo do campo do código');
         return;
       }
       const row=Array.isArray(data)?data[0]:data;
