@@ -4845,8 +4845,28 @@
   let cloudSaveTimer=null;
   let applyingCloud=false;
 
-  function getConfig(){
-    return safeJSON(SUPABASE_CONFIG_KEY,{url:'',anonKey:''});
+  // Public browser configuration; keep the existing storage keys and trip data.
+  const PUBLIC_SUPABASE_CONFIG=Object.freeze({
+    url:'https://ckppsebkjwsdgircxcyh.supabase.co',
+    anonKey:"sb_publishable_aLKcwtNKLNI5TzT67OzabQ_-a8IN0Mb"
+  });
+  const OAUTH_RETURN_KEY='ubatuba-oauth-return-to-trip';
+  const oauthParams=new URLSearchParams(location.hash.slice(1));
+  const oauthQuery=new URLSearchParams(location.search);
+  if(oauthParams.has('access_token') || oauthQuery.has('code')){
+    sessionStorage.setItem(OAUTH_RETURN_KEY,'1');
+  }
+  function getConfig(){return PUBLIC_SUPABASE_CONFIG;}
+  function resumeSharedTrip(){
+    if(!sbSession || !sessionStorage.getItem(OAUTH_RETURN_KEY))return;
+    sessionStorage.removeItem(OAUTH_RETURN_KEY);
+    document.getElementById('checklist')?.scrollIntoView({behavior:'smooth'});
+    openTrip();
+    if(!activeTrip?.id){
+      document.getElementById('tripNoActive').hidden=true;
+      document.getElementById('tripJoinForm').hidden=false;
+      document.getElementById('tripCodeInput').focus();
+    }
   }
   function configured(){
     const c=getConfig();
@@ -4905,19 +4925,24 @@
     });
     const {data}=await sb.auth.getSession();
     sbSession=data.session||null;
-    sb.auth.onAuthStateChange(async(event,session)=>{
+    sb.auth.onAuthStateChange((event,session)=>{
       sbSession=session||null;
       renderCloudStatus();
-      if(sbSession && activeTrip?.id){
-        await loadCloudState();
-        subscribeRealtime();
-      }
+      // Run database calls after the auth callback has returned.
+      setTimeout(async()=>{
+        if(sbSession && activeTrip?.id){
+          await loadCloudState();
+          subscribeRealtime();
+        }
+        resumeSharedTrip();
+      },0);
     });
     renderCloudStatus();
     if(sbSession && activeTrip?.id){
       await loadCloudState();
       subscribeRealtime();
     }
+    resumeSharedTrip();
   }
 
   // Cloud settings modal
@@ -4929,7 +4954,8 @@
     cloudSettings.hidden=false;
   }
   function closeCloudSettings(){cloudSettings.hidden=true;}
-  document.getElementById('cloudSettingsBtn')?.addEventListener('click',openCloudSettings);
+  const configButton=document.getElementById('cloudSettingsBtn');
+  if(configButton)configButton.hidden=true;
   document.getElementById('cloudSettingsClose')?.addEventListener('click',closeCloudSettings);
   document.getElementById('cloudSettingsCancel')?.addEventListener('click',closeCloudSettings);
   cloudSettings?.addEventListener('click',e=>{if(e.target===cloudSettings)closeCloudSettings();});
@@ -4959,11 +4985,13 @@
     }
     if(!sb){await initSupabase();}
     if(!sb)return;
+    sessionStorage.setItem(OAUTH_RETURN_KEY,'1');
     const redirectTo=location.origin+location.pathname;
-    await sb.auth.signInWithOAuth({
+    const {error}=await sb.auth.signInWithOAuth({
       provider:'google',
       options:{redirectTo,queryParams:{access_type:'offline',prompt:'consent'}}
     });
+    if(error){sessionStorage.removeItem(OAUTH_RETURN_KEY);toast('Não foi possível entrar com Google: '+error.message);}
   });
   document.getElementById('googleLogoutBtn')?.addEventListener('click',async()=>{
     if(sb)await sb.auth.signOut();
