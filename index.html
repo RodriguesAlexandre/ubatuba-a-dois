@@ -2261,8 +2261,9 @@
   .section.collapsed-app > *:not(h2):not(.section-title):not(.section-toggle) {display:none !important}
   .section.collapsed-app {padding-bottom:12px}
 
+  body {padding-bottom:calc(90px + env(safe-area-inset-bottom, 0px)) !important}
   .bottom-nav {
-    display:none;
+    display:flex;
     position:fixed;
     left:12px;right:12px;bottom:var(--safe-bottom);
     z-index:9998;
@@ -2287,8 +2288,6 @@
     .reservation-grid {grid-template-columns:repeat(2,1fr)}
     .expense-grid {grid-template-columns:repeat(2,1fr)}
     .essential-grid {grid-template-columns:1fr}
-    .bottom-nav {display:flex}
-    body {padding-bottom:90px !important}
   }
   @media(max-width:720px){
     .summary-strip,.sun-strip,.reservation-grid,.day-map-grid,.weather-plan-grid,.expense-grid,.expense-total-row {
