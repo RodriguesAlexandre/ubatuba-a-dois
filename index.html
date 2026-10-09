@@ -5458,16 +5458,53 @@ body.v30-auth-lock{overflow:hidden}
     if(!configured())throw Error('Configuração de nuvem indisponível');
     if(!window.supabase?.createClient)throw Error('Biblioteca de sincronização não carregou');
     const c=getConfig();
+    const bounded=(promise,label)=>{
+      let timer;
+      return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(label+' demorou demais. Tente novamente.')),20000);})]).finally(()=>clearTimeout(timer));
+    };
+    // Alguns navegadores deixam o Web Lock da sessão preso após o OAuth.
+    // Serialização por cliente mantém as operações Auth em ordem sem depender dele.
+    let authQueue=Promise.resolve();
+    const authLock=(_name,_timeout,operation)=>{
+      const result=authQueue.then(operation,operation);
+      authQueue=result.catch(()=>{});
+      return result;
+    };
+    const sessionStorageAdapter={
+      getItem:key=>{try{return localStorage.getItem(key);}catch{return sessionStorage.getItem(key);}},
+      setItem:(key,value)=>{try{localStorage.setItem(key,value);}catch{sessionStorage.setItem(key,value);}},
+      removeItem:key=>{try{localStorage.removeItem(key);}catch{}try{sessionStorage.removeItem(key);}catch{}}
+    };
     // A sessão é gerenciada pelo cliente Auth. Dados usam o token já recebido,
     // sem chamar getSession novamente durante os eventos de autenticação.
-    sb=window.supabase.createClient(c.url,c.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    sb=window.supabase.createClient(c.url,c.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'implicit',storage:sessionStorageAdapter,lock:authLock},global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(15000)})}});
     db=window.supabase.createClient(c.url,c.anonKey,{
       accessToken:async()=>sbSession?.access_token||null,
       global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(15000)})}
     });
-    const {data,error}=await sb.auth.getSession();
+    let authResult;
+    const access=callbackHash.get('access_token'),refresh=callbackHash.get('refresh_token');
+    const callbackError=callbackParams.get('error_description')||callbackHash.get('error_description')||callbackParams.get('error')||callbackHash.get('error');
+    if(callbackError)throw new Error('Google: '+callbackError);
+    if(access||refresh){
+      if(!access||!refresh)throw new Error('Retorno Google incompleto. Entre novamente.');
+      v30SetAuthStatus('Concluindo sua conexão com Google…');
+      authResult=await bounded(sb.auth.setSession({access_token:access,refresh_token:refresh}),'Concluir login');
+    }else if(callbackParams.has('code')){
+      authResult=await bounded(sb.auth.exchangeCodeForSession(callbackParams.get('code')),'Concluir login');
+    }else{
+      authResult=await bounded(sb.auth.getSession(),'Verificar sessão');
+    }
+    const {data,error}=authResult;
     if(error)throw error;
     sbSession=data?.session||null;
+    if(returning&&!sbSession)throw new Error('Google não retornou uma sessão válida. Entre novamente.');
+    if(sbSession&&returning){
+      const cleanUrl=new URL(location.href);
+      cleanUrl.hash='';
+      ['code','error','error_description','sb_flow_id'].forEach(key=>cleanUrl.searchParams.delete(key));
+      history.replaceState({},'',cleanUrl.pathname+cleanUrl.search);
+    }
     sb.auth.onAuthStateChange((event,session)=>{
       const previousUser=sbSession?.user.id;
       sbSession=session||null;
@@ -5531,6 +5568,7 @@ body.v30-auth-lock{overflow:hidden}
       if(!configured()){toast('Configuração de nuvem indisponível');return;}
       if(location.protocol==='file:'){toast('Abra a versão publicada do site para usar o Google');return;}
       if(!sb)await initSupabase();
+      if(sbSession){resolvedUser=null;queueLoginResolution();return;}
       if(!sb)return;
       pendingJoinCode(); // guarda eventual convite antes de sair para o Google
       const redirectTo=location.origin+location.pathname;
