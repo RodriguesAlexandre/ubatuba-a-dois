@@ -1,4 +1,4 @@
-<!-- Ubatuba a Dois • v27 sync corrigido: Supabase público embutido + segundo aparelho só precisa Google + código --><!-- Ubatuba a Dois • base v27 restaurada • rota de ida corrigida para Praia do Félix --><!DOCTYPE html>
+<!-- Ubatuba a Dois • v30 login-first • auto-descoberta da viagem pelo Supabase --><!-- Ubatuba a Dois • v27 sync iPad: seletor de conta Google + diagnóstico OAuth --><!-- Ubatuba a Dois • v27 sync corrigido: Supabase público embutido + segundo aparelho só precisa Google + código --><!-- Ubatuba a Dois • base v27 restaurada • rota de ida corrigida para Praia do Félix --><!DOCTYPE html>
 
 <html lang="pt-BR">
 <head>
@@ -2923,8 +2923,50 @@
     color:#fff;background:rgba(255,100,95,.18);
     border-color:rgba(255,100,95,.35)
   }
+</style><style id="v30-login-first-css">
+body.v30-auth-lock{overflow:hidden}
+#v30AuthGate,#v30TripGate{position:fixed;inset:0;z-index:12000;display:grid;place-items:center;padding:22px;background:rgba(5,8,12,.97);backdrop-filter:blur(16px)}
+#v30TripGate{z-index:12010}
+#v30AuthGate[hidden],#v30TripGate[hidden]{display:none!important}
+.v30-auth-card,.v30-trip-card{width:min(540px,100%);padding:24px;border-radius:25px;background:#101720;border:1px solid rgba(255,255,255,.09)}
+.v30-auth-actions{display:grid;gap:9px;margin-top:18px}
+.v30-google,.v30-secondary,.v30-primary{width:100%;min-height:48px;border-radius:15px;border:1px solid rgba(255,255,255,.1);font:inherit;font-weight:900;cursor:pointer;padding:11px 14px}
+.v30-google{background:#fff;color:#111}.v30-primary{background:#43d9d2;color:#071113}.v30-secondary{background:rgba(255,255,255,.04);color:#e7edef}
+.v30-auth-status,.v30-trip-meta{margin-top:15px;padding:11px 13px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.065);color:#cbd4d9;font-size:.82rem}
+.v30-trip-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}.v30-join-box{margin-top:14px}.v30-join-box[hidden]{display:none!important}
+.v30-join-box input{width:100%;box-sizing:border-box;padding:13px;border-radius:14px;background:#080d12;color:#fff;border:1px solid rgba(255,255,255,.11);font:inherit;text-transform:uppercase;letter-spacing:.12em;text-align:center;font-weight:900}
+@media(max-width:620px){.v30-trip-actions{grid-template-columns:1fr}}
 </style></head>
-<body>
+<body><div id="v30AuthGate">
+<div class="v30-auth-card">
+<div style="font-size:2rem">🌊</div>
+<h1>Ubatuba a Dois</h1>
+<p>Entre com Google para carregar automaticamente a viagem compartilhada, o checklist, o mercado e o progresso de vocês.</p>
+<div class="v30-auth-status" id="v30AuthStatus">Verificando sua sessão…</div>
+<div class="v30-auth-actions">
+<button class="v30-google" id="v30GateGoogle" type="button">G  Entrar com Google</button>
+<button class="v30-secondary" id="v30ContinueOffline" type="button">Continuar sem sincronizar</button>
+</div>
+<small>Em um aparelho novo você não precisa configurar URL ou chave.</small>
+</div>
+</div><div hidden="" id="v30TripGate">
+<div class="v30-trip-card">
+<h2>Qual viagem você quer abrir?</h2>
+<p id="v30TripGateCopy">Sua conta Google ainda não está vinculada a uma viagem.</p>
+<div class="v30-trip-meta" hidden="" id="v30PendingJoin"></div>
+<div class="v30-trip-actions">
+<button class="v30-primary" id="v30CreateTrip" type="button">Criar esta viagem</button>
+<button class="v30-secondary" id="v30ShowJoin" type="button">Entrar com código</button>
+</div>
+<div class="v30-join-box" hidden="" id="v30JoinBox">
+<input autocomplete="off" id="v30JoinCode" maxlength="12" placeholder="CÓDIGO"/>
+<div class="v30-auth-actions">
+<button class="v30-primary" id="v30JoinTrip" type="button">Entrar na viagem</button>
+<button class="v30-secondary" id="v30CancelJoin" type="button">Voltar</button>
+</div></div>
+<div class="v30-auth-actions"><button class="v30-secondary" id="v30TripLogout" type="button">Usar outra conta Google</button></div>
+</div>
+</div>
 <div class="static-preview-note">
     Visualização compatível com iPad: o conteúdo está em modo estático para garantir leitura mesmo quando o visualizador não executa JavaScript.
   </div>
@@ -3663,7 +3705,7 @@
 <button class="cloud-btn subtle" hidden="" id="googleLogoutBtn" type="button">Sair</button>
 </div>
 <div class="cloud-trip-status" hidden="" id="cloudTripStatus"></div>
-</div>
+<div class="cloud-setup-note" id="ipadOAuthHint" style="margin-top:10px">Em iPad/iPhone, prefira abrir este site diretamente no Safari. Se a conta Google for diferente da conta principal, o login agora sempre abre o seletor de contas.</div><div class="cloud-setup-note" id="v30CloudFlowHint" style="margin-top:10px">Fluxo v30: Google → viagem encontrada automaticamente. Conta nova: Google → código da viagem. Mesmo usuário em outro aparelho: Google → roteiro.</div></div>
 <div class="checklist-grid">
 <div class="checklist-card" data-check-category="cat-0"><div class="checklist-card-header"><h4>🏡 Reserva e hospedagem</h4><button class="add-check-item" data-add-category="cat-0" type="button">+ Adicionar</button></div>
 <label class="check-item" data-item-key="reserva-confirmada"><input checked="" data-pack="reserva-confirmada" type="checkbox"/><span class="item-text">Reserva confirmada e pagamento da hospedagem concluído</span><select aria-label="Responsável" class="owner-select" data-owner-key="reserva-confirmada"><option value="nos">Nós</option><option value="alexandre">Alexandre</option><option value="yasmin">Yasmin</option></select><div class="item-actions"><button aria-label="Editar item" class="item-action edit-item" data-edit-key="reserva-confirmada" title="Editar item" type="button">✎</button><button aria-label="Excluir item" class="item-action delete-item" data-delete-key="reserva-confirmada" title="Excluir item" type="button">×</button></div></label>
@@ -4721,7 +4763,7 @@
 </div>
 <button aria-label="Fechar" class="modal-close" id="cloudSettingsClose" type="button">×</button>
 </div>
-<div class="cloud-setup-note">O projeto Supabase deste site já vem configurado automaticamente. <strong>Você não precisa preencher estes campos em outro aparelho.</strong> Use esta tela apenas para diagnóstico ou troca de projeto.</div>
+<div class="cloud-setup-note">O Project URL e a Publishable Key já estão embutidos no site. <strong>Em outro aparelho, ninguém precisa configurar esses campos.</strong> Esta tela fica apenas para diagnóstico ou troca futura de projeto.</div>
 <label class="modal-field">
 <span>Supabase Project URL</span>
 <input autocomplete="off" id="supabaseUrlInput" placeholder="https://ckppsebkjwsdgircxcyh.supabase.co" type="url"/>
@@ -4779,7 +4821,7 @@
 <div class="share-code-box">
 <small>Código da viagem</small>
 <strong id="activeTripCode">—</strong>
-<button class="modal-btn subtle" id="copyTripCode" type="button">Copiar código</button>
+<button class="modal-btn subtle" id="copyTripCode" type="button">Copiar código</button><button class="modal-btn subtle" id="copyTripLink" type="button">Copiar link de convite</button>
 </div>
 <p class="modal-copy">Qualquer alteração feita por um membro desta viagem será salva na nuvem e refletida no outro aparelho.</p>
 </div>
@@ -4794,6 +4836,8 @@
   const SUPABASE_CONFIG_KEY='ubatuba-supabase-config';
   const ACTIVE_TRIP_KEY='ubatuba-active-trip';
   const DEVICE_KEY='ubatuba-device-id';
+  const OFFLINE_MODE_KEY='ubatuba-offline-mode';
+  const PENDING_JOIN_KEY='ubatuba-pending-join';
 
   // Configuração pública do frontend.
   // Não é segredo: a segurança continua nas políticas RLS do Supabase.
@@ -5155,6 +5199,44 @@
   let realtimeChannel=null;
   let cloudSaveTimer=null;
   let applyingCloud=false;
+  let v30AuthBusy=false;
+
+  const v30AuthGate=document.getElementById('v30AuthGate');
+  const v30TripGate=document.getElementById('v30TripGate');
+  const v30AuthStatus=document.getElementById('v30AuthStatus');
+
+  function v30SetAuthStatus(msg){ if(v30AuthStatus)v30AuthStatus.textContent=msg; }
+  function v30ShowAuthGate(msg='Entre com Google para sincronizar a viagem.'){
+    v30SetAuthStatus(msg); if(v30AuthGate)v30AuthGate.hidden=false; document.body.classList.add('v30-auth-lock');
+  }
+  function v30HideAuthGate(){
+    if(v30AuthGate)v30AuthGate.hidden=true;
+    if(!v30TripGate || v30TripGate.hidden)document.body.classList.remove('v30-auth-lock');
+  }
+  function v30ShowTripGate(){ if(v30TripGate)v30TripGate.hidden=false; document.body.classList.add('v30-auth-lock'); }
+  function v30HideTripGate(){
+    if(v30TripGate)v30TripGate.hidden=true;
+    if(!v30AuthGate || v30AuthGate.hidden)document.body.classList.remove('v30-auth-lock');
+  }
+  function pendingJoinCode(){
+    const qs=new URLSearchParams(location.search);
+    const fromUrl=(qs.get('join')||'').trim().toUpperCase();
+    if(fromUrl){try{localStorage.setItem(PENDING_JOIN_KEY,fromUrl);}catch(e){} return fromUrl;}
+    return (localStorage.getItem(PENDING_JOIN_KEY)||'').trim().toUpperCase();
+  }
+  function clearPendingJoinCode(){
+    try{localStorage.removeItem(PENDING_JOIN_KEY);}catch(e){}
+    const u=new URL(location.href);
+    if(u.searchParams.has('join')){
+      u.searchParams.delete('join');
+      history.replaceState({},'',u.pathname+(u.search?u.search:'')+u.hash);
+    }
+  }
+  function shareTripUrl(code){
+    const u=new URL(location.origin+location.pathname);
+    u.searchParams.set('join',code);
+    return u.toString();
+  }
 
   function getConfig(){
     // O localStorage fica apenas como override avançado.
@@ -5207,46 +5289,121 @@
     }
   }
 
-  async function initSupabase(){
-    renderCloudStatus();
-    if(!configured())return;
-    if(!window.supabase?.createClient){
-      document.getElementById('cloudSyncText').textContent='A biblioteca de sincronização não carregou neste visualizador. Ela funcionará no site hospedado.';
-      return;
-    }
-    const c=getConfig();
-    sb=window.supabase.createClient(c.url,c.anonKey,{
-      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
-    });
-    const {data}=await sb.auth.getSession();
-    sbSession=data.session||null;
-    sb.auth.onAuthStateChange(async(event,session)=>{
-      sbSession=session||null;
-      renderCloudStatus();
-      if(sbSession && activeTrip?.id){
-        await loadCloudState();
-        subscribeRealtime();
-      }else if(sbSession){
-        promptTripAfterLogin();
-      }
-    });
-    renderCloudStatus();
-    if(sbSession && activeTrip?.id){
-      await loadCloudState();
-      subscribeRealtime();
-    }else if(sbSession){
-      promptTripAfterLogin();
-    }
+  function showOAuthCallbackError(){
+    const params=new URLSearchParams(location.search);
+    const hash=new URLSearchParams((location.hash||'').replace(/^#/,''));
+    const err=params.get('error_description')||params.get('error')||
+              hash.get('error_description')||hash.get('error');
+    if(!err)return;
+    const clean=decodeURIComponent(String(err).replace(/\+/g,' '));
+    console.error('OAuth callback error:',clean);
+    setTimeout(()=>toast('Login Google: '+clean),150);
   }
 
-  function promptTripAfterLogin(){
-    if(!sbSession || activeTrip?.id) return;
-    if(sessionStorage.getItem('ubatuba-trip-prompted')) return;
-    sessionStorage.setItem('ubatuba-trip-prompted','1');
-    setTimeout(()=>{
-      renderTripModal();
-      if(tripBackdrop) tripBackdrop.hidden=false;
-    },250);
+  async function fetchTripById(tripId){
+    if(!sb||!tripId)return null;
+    const {data,error}=await sb.from('trips').select('id,name,invite_code,created_at').eq('id',tripId).maybeSingle();
+    if(error){console.error('fetchTripById:',error);return null;}
+    return data||null;
+  }
+
+  async function setActiveTripFromServer(tripId){
+    const trip=await fetchTripById(tripId);
+    if(!trip)return false;
+    activeTrip={id:trip.id,code:trip.invite_code,name:trip.name||'Ubatuba a Dois'};
+    saveJSON(ACTIVE_TRIP_KEY,activeTrip);
+    renderCloudStatus();
+    return true;
+  }
+
+  async function joinTripByCode(code,{silent=false}={}){
+    code=(code||'').trim().toUpperCase();
+    if(!code||!sb||!sbSession)return false;
+    const {data,error}=await sb.rpc('join_shared_trip',{invite_code_input:code});
+    if(error){console.error('join_shared_trip:',error);if(!silent)toast('Código inválido ou acesso negado');return false;}
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row?.trip_id||!row?.invite_code){if(!silent)toast('Não foi possível entrar nessa viagem');return false;}
+    activeTrip={id:row.trip_id,code:row.invite_code};
+    saveJSON(ACTIVE_TRIP_KEY,activeTrip);
+    clearPendingJoinCode();
+    await loadCloudState(true);
+    subscribeRealtime();
+    renderCloudStatus();
+    v30HideTripGate();v30HideAuthGate();
+    if(!silent)toast('Você entrou na viagem');
+    return true;
+  }
+
+  async function discoverTripForSession(){
+    if(!sb||!sbSession)return false;
+    const pending=pendingJoinCode();
+    if(pending){
+      const info=document.getElementById('v30PendingJoin');
+      if(info){info.hidden=false;info.textContent='Convite detectado: '+pending+' • validando…';}
+      const joined=await joinTripByCode(pending,{silent:true});
+      if(joined)return true;
+      if(info)info.textContent='Não foi possível entrar automaticamente. Confira o código.';
+      const input=document.getElementById('v30JoinCode'); if(input)input.value=pending;
+    }
+
+    const {data:memberships,error}=await sb.from('trip_members')
+      .select('trip_id,role,joined_at').eq('user_id',sbSession.user.id)
+      .order('joined_at',{ascending:false});
+    if(error){console.error('trip_members discovery:',error);return false;}
+    const rows=memberships||[];
+    if(!rows.length){
+      localStorage.removeItem(ACTIVE_TRIP_KEY);activeTrip=null;renderCloudStatus();return false;
+    }
+    let chosen=activeTrip?.id?rows.find(r=>r.trip_id===activeTrip.id):null;
+    if(!chosen)chosen=rows[0];
+    const ok=await setActiveTripFromServer(chosen.trip_id);
+    if(!ok)return false;
+    await loadCloudState();
+    subscribeRealtime();
+    return true;
+  }
+
+  async function resolveAfterLogin(){
+    if(!sbSession)return;
+    v30SetAuthStatus('Conta conectada. Procurando sua viagem…');
+    const found=await discoverTripForSession();
+    if(found){v30HideTripGate();v30HideAuthGate();return;}
+    const email=sbSession.user?.email||'Conta Google conectada';
+    const copy=document.getElementById('v30TripGateCopy');
+    if(copy)copy.textContent=email+' está conectado, mas ainda não pertence a uma viagem.';
+    const pending=pendingJoinCode();
+    if(pending){
+      const input=document.getElementById('v30JoinCode');
+      const box=document.getElementById('v30JoinBox');
+      if(input)input.value=pending;if(box)box.hidden=false;
+    }
+    v30HideAuthGate();v30ShowTripGate();
+  }
+
+  async function initSupabase(){
+    showOAuthCallbackError();renderCloudStatus();
+    if(localStorage.getItem(OFFLINE_MODE_KEY)==='1'){v30HideAuthGate();return;}
+    v30ShowAuthGate('Verificando sua sessão Google…');
+    if(!configured()){v30ShowAuthGate('A configuração de nuvem não está disponível.');return;}
+    if(!window.supabase?.createClient){v30ShowAuthGate('A biblioteca de sincronização não carregou. Abra o site publicado no Safari/Chrome.');return;}
+
+    const c=getConfig();
+    sb=window.supabase.createClient(c.url,c.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    const {data,error}=await sb.auth.getSession();
+    if(error)console.error('getSession:',error);
+    sbSession=data?.session||null;renderCloudStatus();
+
+    sb.auth.onAuthStateChange(async(event,session)=>{
+      sbSession=session||null;renderCloudStatus();
+      if(event==='SIGNED_OUT'||!sbSession){
+        activeTrip=null;localStorage.removeItem(ACTIVE_TRIP_KEY);
+        v30HideTripGate();v30ShowAuthGate('Entre com Google para sincronizar a viagem.');return;
+      }
+      setTimeout(()=>resolveAfterLogin().catch(console.error),0);
+    });
+
+    if(sbSession)await resolveAfterLogin();
+    else v30ShowAuthGate('Entre com Google para sincronizar a viagem entre os aparelhos.');
   }
 
   // Cloud settings modal
@@ -5278,28 +5435,45 @@
   });
 
   // Login / logout
-  document.getElementById('googleLoginBtn')?.addEventListener('click',async()=>{
-    if(!configured()){
-      toast('Configuração de nuvem indisponível');
-      return;
-    }
-    if(location.protocol==='file:'){
-      toast('Hospede o site primeiro para concluir login Google');
-      openCloudSettings();
-      return;
-    }
-    if(!sb){await initSupabase();}
-    if(!sb)return;
-    const redirectTo=location.origin+location.pathname;
-    await sb.auth.signInWithOAuth({
-      provider:'google',
-      options:{redirectTo,queryParams:{access_type:'offline',prompt:'consent'}}
-    });
-  });
-  document.getElementById('googleLogoutBtn')?.addEventListener('click',async()=>{
+  async function startGoogleLogin(){
+    if(v30AuthBusy)return;
+    v30AuthBusy=true;
+    try{
+      localStorage.removeItem(OFFLINE_MODE_KEY);
+      if(!configured()){toast('Configuração de nuvem indisponível');return;}
+      if(location.protocol==='file:'){toast('Abra a versão publicada do site para usar o Google');return;}
+      if(!sb)await initSupabase();
+      if(!sb)return;
+      pendingJoinCode(); // guarda eventual convite antes de sair para o Google
+      const redirectTo=location.origin+location.pathname;
+      const {data,error}=await sb.auth.signInWithOAuth({
+        provider:'google',
+        options:{redirectTo,queryParams:{prompt:'select_account'}}
+      });
+      if(error){console.error('Google OAuth:',error);toast('Erro no login Google: '+(error.message||'tente novamente'));}
+      return data;
+    }catch(err){
+      console.error('Google OAuth exception:',err);
+      toast('Não foi possível abrir o login Google neste navegador');
+    }finally{v30AuthBusy=false;}
+  }
+
+  document.getElementById('googleLoginBtn')?.addEventListener('click',startGoogleLogin);
+  document.getElementById('v30GateGoogle')?.addEventListener('click',startGoogleLogin);
+
+  async function logoutGoogle(){
     if(sb)await sb.auth.signOut();
-    sbSession=null;
-    renderCloudStatus();
+    sbSession=null;activeTrip=null;
+    localStorage.removeItem(ACTIVE_TRIP_KEY);
+    sessionStorage.removeItem('ubatuba-cloud-reloaded');
+    renderCloudStatus();v30HideTripGate();
+    v30ShowAuthGate('Sessão encerrada. Entre com a conta Google que deseja usar.');
+  }
+  document.getElementById('googleLogoutBtn')?.addEventListener('click',logoutGoogle);
+  document.getElementById('v30TripLogout')?.addEventListener('click',logoutGoogle);
+
+  document.getElementById('v30ContinueOffline')?.addEventListener('click',()=>{
+    localStorage.setItem(OFFLINE_MODE_KEY,'1');v30HideAuthGate();toast('Modo sem sincronização');
   });
 
   // Trip sharing modal
@@ -5347,10 +5521,13 @@
       }
       activeTrip={id:row.trip_id,code:row.invite_code};
       saveJSON(ACTIVE_TRIP_KEY,activeTrip);
+      clearPendingJoinCode();
       await saveCloudState(true);
       subscribeRealtime();
       renderCloudStatus();
       renderTripModal();
+      v30HideTripGate();
+      v30HideAuthGate();
       toast('Viagem compartilhada criada');
     }catch(err){
       console.error(err);
@@ -5363,35 +5540,7 @@
   document.getElementById('joinTripBtn')?.addEventListener('click',async()=>{
     if(!sbSession||!sb){toast('Entre com Google primeiro');return;}
     const code=document.getElementById('tripCodeInput').value.trim().toUpperCase();
-    if(!code){toast('Digite o código da viagem');return;}
-    const btn=document.getElementById('joinTripBtn');
-    if(btn){btn.disabled=true;btn.style.opacity='.65';}
-    try{
-      const {data,error}=await sb.rpc('join_shared_trip',{invite_code_input:code});
-      if(error){
-        console.error('join_shared_trip:',error);
-        toast('Código inválido ou acesso negado');
-        return;
-      }
-      const row=Array.isArray(data)?data[0]:data;
-      if(!row?.trip_id || !row?.invite_code){
-        console.error('Resposta inesperada de join_shared_trip:',data);
-        toast('Resposta inesperada ao entrar na viagem');
-        return;
-      }
-      activeTrip={id:row.trip_id,code:row.invite_code};
-      saveJSON(ACTIVE_TRIP_KEY,activeTrip);
-      await loadCloudState(true);
-      subscribeRealtime();
-      renderCloudStatus();
-      renderTripModal();
-      toast('Você entrou na viagem');
-    }catch(err){
-      console.error(err);
-      toast('Falha ao entrar na viagem');
-    }finally{
-      if(btn){btn.disabled=false;btn.style.opacity='';}
-    }
+    await joinTripByCode(code);
   });
 
   document.getElementById('copyTripCode')?.addEventListener('click',async()=>{
@@ -5401,9 +5550,48 @@
     catch(e){toast('Código: '+code);}
   });
 
+  document.getElementById('copyTripLink')?.addEventListener('click',async()=>{
+    const code=activeTrip?.code;if(!code)return;
+    const link=shareTripUrl(code);
+    try{
+      if(navigator.share)await navigator.share({title:'Ubatuba a Dois',text:'Entre na nossa viagem compartilhada:',url:link});
+      else{await navigator.clipboard.writeText(link);toast('Link de convite copiado');}
+    }catch(e){
+      try{await navigator.clipboard.writeText(link);toast('Link de convite copiado');}
+      catch(_){toast(link);}
+    }
+  });
+
+  async function createTripFromV30(){
+    if(!sbSession||!sb){v30ShowAuthGate('Entre com Google primeiro.');return;}
+    const btn=document.getElementById('v30CreateTrip');
+    if(btn){btn.disabled=true;btn.style.opacity='.65';}
+    try{
+      const {data,error}=await sb.rpc('create_shared_trip',{trip_name:'Ubatuba a Dois • 10–12/10/2026'});
+      if(error){console.error(error);toast('Erro ao criar viagem: '+(error.message||''));return;}
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row?.trip_id||!row?.invite_code){toast('Resposta inesperada ao criar viagem');return;}
+      activeTrip={id:row.trip_id,code:row.invite_code};saveJSON(ACTIVE_TRIP_KEY,activeTrip);
+      clearPendingJoinCode();await saveCloudState(true);subscribeRealtime();renderCloudStatus();
+      v30HideTripGate();v30HideAuthGate();toast('Viagem criada • código '+row.invite_code);
+    }finally{if(btn){btn.disabled=false;btn.style.opacity='';}}
+  }
+  document.getElementById('v30CreateTrip')?.addEventListener('click',createTripFromV30);
+  document.getElementById('v30ShowJoin')?.addEventListener('click',()=>{
+    document.getElementById('v30JoinBox').hidden=false;document.getElementById('v30JoinCode')?.focus();
+  });
+  document.getElementById('v30CancelJoin')?.addEventListener('click',()=>{document.getElementById('v30JoinBox').hidden=true;});
+  document.getElementById('v30JoinTrip')?.addEventListener('click',async()=>{
+    const code=document.getElementById('v30JoinCode')?.value||'';
+    const ok=await joinTripByCode(code);if(ok){v30HideTripGate();v30HideAuthGate();}
+  });
+  document.getElementById('v30JoinCode')?.addEventListener('keydown',e=>{
+    if(e.key==='Enter')document.getElementById('v30JoinTrip')?.click();
+  });
+
   function collectState(){
     return {
-      version:27,
+      version:30,
       updatedAt:new Date().toISOString(),
       deviceId:deviceId(),
       app:safeJSON(APP_KEY,{}),
@@ -5486,7 +5674,11 @@
   });
 
   renderCloudStatus();
-  initSupabase().catch(console.error);
+  if(localStorage.getItem(OFFLINE_MODE_KEY)!=='1')v30ShowAuthGate('Verificando sua sessão Google…');
+  initSupabase().catch(err=>{
+    console.error(err);
+    v30ShowAuthGate('Não foi possível iniciar a sincronização. Tente recarregar a página.');
+  });
 })();
 </script><div class="market-modal-backdrop" hidden="" id="marketEditorBackdrop"><div aria-modal="true" class="market-modal" role="dialog"><h3 id="marketEditorTitle">Adicionar item ao mercado</h3><p id="marketEditorCopy">Digite o item que vocês querem incluir na compra.</p><input autocomplete="off" id="marketEditorText" maxlength="140" placeholder="Ex.: protetor solar, refrigerante, queijo..." type="text"/><div class="market-modal-actions"><button class="market-modal-btn" id="marketEditorCancel" type="button">Cancelar</button><button class="market-modal-btn primary" id="marketEditorSave" type="button">Adicionar</button></div></div></div></body>
 </html>
