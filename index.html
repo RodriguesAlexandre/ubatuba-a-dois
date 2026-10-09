@@ -3957,7 +3957,7 @@ body.v30-auth-lock{overflow:hidden}
             observer.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
       revealItems.forEach((el) => observer.observe(el));
 
       const parallaxItems = document.querySelectorAll('.parallax-layer');
@@ -5840,3 +5840,4 @@ body.v30-auth-lock{overflow:hidden}
 })();
 </script></body>
 </html>
+
