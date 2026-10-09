@@ -2855,6 +2855,74 @@
     font-size: .78rem;
     line-height: 1.45;
   }
+</style><style id="v27-market-editable-css">
+  #mercado .market-list-tools{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    flex-wrap:wrap;margin:12px 0 10px;
+  }
+  #mercado .market-list-tools small{color:var(--muted);font-size:.78rem}
+  #mercado .market-add-btn{
+    min-height:38px;padding:8px 12px;border-radius:999px;
+    border:1px solid rgba(67,217,210,.18);
+    background:rgba(67,217,210,.085);color:#8df4ef;
+    font:inherit;font-size:.78rem;font-weight:900;cursor:pointer;
+  }
+  #mercado .qty-item{
+    display:grid !important;
+    grid-template-columns:auto minmax(0,1fr) auto;
+    align-items:start;gap:9px;
+    padding:8px 0;
+  }
+  #mercado .market-item-text{min-width:0;line-height:1.42}
+  #mercado .market-item-actions{display:flex;gap:5px}
+  #mercado .market-item-action{
+    width:31px;height:31px;min-height:31px;padding:0;
+    display:grid;place-items:center;border-radius:50%;
+    border:1px solid rgba(255,255,255,.075);
+    background:rgba(255,255,255,.035);color:#c1cbd1;
+    cursor:pointer;font:inherit;font-weight:900;
+  }
+  #mercado .market-item-action.market-delete{
+    color:#ff9f96;border-color:rgba(255,100,95,.13);
+    background:rgba(255,100,95,.05);
+  }
+  .market-modal-backdrop{
+    position:fixed;inset:0;z-index:10050;
+    display:grid;place-items:center;padding:20px;
+    background:rgba(2,5,8,.74);backdrop-filter:blur(8px);
+  }
+  .market-modal-backdrop[hidden]{display:none!important}
+  .market-modal{
+    width:min(520px,100%);
+    padding:20px;border-radius:22px;
+    background:linear-gradient(145deg,#121922,#0a0f15);
+    border:1px solid rgba(255,255,255,.09);
+    box-shadow:0 24px 70px rgba(0,0,0,.45);
+  }
+  .market-modal h3{margin:0 0 8px;color:#fff}
+  .market-modal p{margin:0 0 14px;color:var(--muted)}
+  .market-modal input{
+    width:100%;box-sizing:border-box;padding:12px 13px;border-radius:13px;
+    border:1px solid rgba(255,255,255,.10);background:#080d12;
+    color:#fff;font:inherit;outline:none;
+  }
+  .market-modal input:focus{border-color:rgba(67,217,210,.45)}
+  .market-modal-actions{
+    display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap
+  }
+  .market-modal-btn{
+    min-height:40px;padding:9px 13px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.09);
+    background:rgba(255,255,255,.045);color:#e8eef1;
+    font:inherit;font-weight:800;cursor:pointer
+  }
+  .market-modal-btn.primary{
+    color:#071113;background:#43d9d2;border-color:#43d9d2
+  }
+  .market-modal-btn.danger{
+    color:#fff;background:rgba(255,100,95,.18);
+    border-color:rgba(255,100,95,.35)
+  }
 </style></head>
 <body>
 <div class="static-preview-note">
@@ -3081,7 +3149,10 @@
 <div class="market-grid">
 <div class="card glass reveal">
 <div class="pill">Parada principal</div>
-<h3>Shibata Supermercados — Rodovia Oswaldo Cruz</h3>
+<div class="mini-progress-block">
+<div><strong>Compra do mercado</strong><span id="marketCount">0 / 0</span></div>
+<div class="mini-progress"><span id="marketProgress"></span></div>
+</div><h3>Shibata Supermercados — Rodovia Oswaldo Cruz</h3>
 <p class="section-sub" style="margin-bottom:0;">
             É a opção mais prática para uma compra completa porque fica na Rodovia Oswaldo Cruz,
             no mesmo eixo usado para seguir em direção ao Horto. Tem estrutura de hipermercado e estacionamento.
@@ -3122,7 +3193,24 @@
 <div class="card glass reveal">
 <div class="pill" style="background:rgba(255,209,102,.10)!important;color:#ffe09a!important;">Compra sugerida</div>
 <h3>Compra enxuta para 2 pessoas • 2 manhãs + praia</h3>
-<p class="section-sub"><a href="#marketChecklistShared">🛒 Abrir lista de compras no checklist</a></p>
+<div class="market-list-tools"><button class="market-add-btn" id="addMarketItemBtn" type="button">＋ Adicionar item</button><small>Itens marcados, adicionados, editados e removidos sincronizam na viagem compartilhada.</small></div><div class="qty-list">
+<div class="qty-item"><input class="market-check" data-market="item-0" type="checkbox"/><span>☕ <b>Café:</b> 250 g ou 8–10 cápsulas</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-1" type="checkbox"/><span>🥛 <b>Leite:</b> 1 litro</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-2" type="checkbox"/><span>🥖 <b>Pão:</b> 1 pacote ou 6–8 pães</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-3" type="checkbox"/><span>🥚 <b>Ovos:</b> 6 unidades</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-4" type="checkbox"/><span>🧀 <b>Queijo:</b> ~200 g</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-5" type="checkbox"/><span>🥓 <b>Frios:</b> ~150–200 g</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-6" type="checkbox"/><span>🧈 <b>Manteiga/requeijão:</b> 1 unidade</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-7" type="checkbox"/><span>🍌 <b>Frutas:</b> 6–8 unidades variadas</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-8" type="checkbox"/><span>🥣 <b>Iogurte:</b> 2–4 unidades</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-9" type="checkbox"/><span>💧 <b>Água:</b> pelo menos 5–6 litros no total</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-10" type="checkbox"/><span>🧃 <b>Água de coco/suco:</b> 4 unidades ou 1 litro</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-11" type="checkbox"/><span>🥜 <b>Castanhas/amendoim:</b> 1 pacote pequeno</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-12" type="checkbox"/><span>🍪 <b>Biscoito/cracker:</b> 1 pacote</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-13" type="checkbox"/><span>🥪 <b>Sanduíche:</b> tomate + folhas + frios</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-14" type="checkbox"/><span>🧊 <b>Gelo:</b> bolsa térmica ou gelo reutilizável</span></div>
+<div class="qty-item"><input class="market-check" data-market="item-15" type="checkbox"/><span>🍷 <b>Varanda:</b> vinho/bebida + chocolate opcional</span></div>
+</div>
 <div class="meal-ideas-grid">
 <div class="meal-idea">
 <strong>☀️ Domingo — café da manhã</strong>
@@ -3244,7 +3332,17 @@
 </section><section class="section reveal" id="mapas-dias">
 <h2 class="section-title">Mapas rápidos por dia</h2><button aria-label="Recolher ou expandir seção" class="section-toggle" type="button">−</button>
 <p class="section-sub">Em vez de misturar tudo em um único mapa, cada dia tem sua própria sequência. Os botões abrem a rota no Google Maps; cada parada do cronograma também ganhou Google Maps e Waze.</p>
-<div class="day-map-grid">
+<div class="day-map-grid"><div class="card glass">
+<div class="pill">Sexta • ida BH → Ubatuba</div>
+<h3>BH → Três Corações → Taubaté → Ubatuba</h3>
+<ol class="route-list">
+<li>Saída de Engenho Nogueira • 20h30–21h</li>
+<li>Posto Trevo Marins • Três Corações • abastecer + comer</li>
+<li>Auto Posto Cerejeira Shell • Taubaté • café + pausa antes da serra</li>
+<li>Ubatuba / Horto Florestal • chegada ~06h30–07h30</li>
+</ol>
+<a class="map-btn primary" href="https://www.google.com/maps/dir/?api=1&amp;origin=Engenho+Nogueira,+Belo+Horizonte,+MG&amp;destination=Rodovia+Oswaldo+Cruz,+4502,+Ubatuba,+SP&amp;waypoints=BR-381+km+744,+Tres+Coracoes,+MG%7CRodovia+Oswaldo+Cruz,+1640,+Taubate,+SP" rel="noopener" target="_blank">Abrir rota de ida</a>
+</div>
 <div class="card glass">
 <div class="pill">Sábado • eixo norte</div>
 <h3>Félix → Prumirim → mercado → loft → Itamambuca</h3>
@@ -3290,22 +3388,75 @@
 </div>
 </section><section class="section reveal" id="roteiro">
 <h2 class="section-title">Roteiro completo</h2><button aria-label="Recolher ou expandir seção" class="section-toggle" type="button">−</button>
-<p class="section-sub">Estruturei a viagem inteira de forma equilibrada, considerando descanso, aproveitamento das praias e tempo de qualidade na hospedagem.</p>
+<p class="section-sub">Roteiro detalhado, agora com a madrugada de ida fechada: horários, distâncias, endereços, alimentação e estratégia de abastecimento do Kwid.</p>
 <div class="timeline">
 <div class="day" data-day-key="sex">
-<div class="day-stamp"><span>SEXTA</span><strong>09/10</strong><div style="margin-top:8px;color:var(--muted);">BH → Ubatuba</div></div>
+<div class="day-stamp"><span>SEXTA</span><strong>09/10</strong><div style="margin-top:8px;color:var(--muted);">BH → Três Corações → Taubaté → Ubatuba</div></div>
 <div class="day-card glass reveal">
-<div class="day-header"><h3 class="day-title">Noite de estrada com paradas leves</h3><div class="cost-tag">Estimativa do dia: R$ 330–430</div>
+<div class="day-header"><h3 class="day-title">Estrada planejada: duas paradas, comida e combustível no mesmo eixo</h3><div class="cost-tag">Tanque cheio em BH • 1 abastecimento principal + 1 opcional</div>
 <div class="day-progress-wrap">
 <span id="dayProgressText-sex">0 / 0</span>
 <div class="mini-progress"><span id="dayProgress-sex"></span></div>
 </div>
 </div>
 <div class="stops">
-<div class="stop" data-stop-key="sex-0" data-stop-title="Saída do Engenho Nogueira"><div class="time">21h–22h</div><div><strong>Saída do Engenho Nogueira</strong><span class="priority-badge">Roteiro</span><p>Saída ideal para chegar cedo em Ubatuba e transformar o sábado em um dia útil de passeio. Levem água, playlist, lanches e uma muda prática de roupa.</p></div><div class="stop-controls"><label class="stop-done"><input class="day-stop-check" data-stop="sex-0" type="checkbox"/><span>feito</span></label><button aria-label="Favoritar parada" class="fav-btn" data-fav="sex-0" type="button">☆</button></div></div>
-<div class="stop" data-stop-key="sex-1" data-stop-title="1ª parada"><div class="time">00h30</div><div><strong>1ª parada</strong><span class="priority-badge">Roteiro</span><p>Pausa curta para banheiro, café e alongar. O ideal é não deixar essa pausa virar um intervalo longo demais.</p></div><div class="stop-controls"><label class="stop-done"><input class="day-stop-check" data-stop="sex-1" type="checkbox"/><span>feito</span></label><button aria-label="Favoritar parada" class="fav-btn" data-fav="sex-1" type="button">☆</button></div></div>
-<div class="stop" data-stop-key="sex-2" data-stop-title="2ª parada"><div class="time">04h30</div><div><strong>2ª parada</strong><span class="priority-badge">Roteiro</span><p>Mais uma pausa leve antes do trecho final. Se o cansaço apertar, compensa descansar um pouco mais e chegar melhor.</p></div><div class="stop-controls"><label class="stop-done"><input class="day-stop-check" data-stop="sex-2" type="checkbox"/><span>feito</span></label><button aria-label="Favoritar parada" class="fav-btn" data-fav="sex-2" type="button">☆</button></div></div>
-<div class="stop" data-stop-key="sex-3" data-stop-title="Chegada a Ubatuba"><div class="time">07h–08h</div><div><strong>Chegada a Ubatuba</strong><span class="priority-badge">Roteiro</span><p>Como o check-in da hospedagem tende a ser à tarde, a melhor estratégia é já entrar no clima da cidade e começar com praia.</p></div><div class="stop-controls"><label class="stop-done"><input class="day-stop-check" data-stop="sex-3" type="checkbox"/><span>feito</span></label><button aria-label="Favoritar parada" class="fav-btn" data-fav="sex-3" type="button">☆</button></div></div>
+<div class="stop" data-stop-key="sex-0" data-stop-title="Saída de Engenho Nogueira">
+<div class="time">20h30–21h</div>
+<div>
+<strong>🚗 Saída de Engenho Nogueira com tanque cheio</strong><span class="priority-badge must">Plano definido</span>
+<p><strong>Carro:</strong> Renault Kwid 2019 • tanque ~38 L. Saída com gasolina e tanque cheio. Levem água e um lanche simples para o primeiro trecho.</p>
+<p><strong>Trecho até Três Corações:</strong> ~295 km • ~3h50–4h15. Chegada estimada entre <strong>00h20 e 01h15</strong>, dependendo do horário real de saída e do trânsito.</p>
+<div class="stop-route-links"><a class="mini-route" href="https://www.google.com/maps/dir/?api=1&amp;origin=Engenho+Nogueira,+Belo+Horizonte,+MG&amp;destination=BR-381+km+744,+Tres+Coracoes,+MG" rel="noopener" target="_blank">Maps</a><a class="mini-route" href="https://www.waze.com/ul?q=BR-381%20km%20744%2C%20Tres%20Coracoes%2C%20MG&amp;navigate=yes" rel="noopener" target="_blank">Waze</a></div>
+</div>
+<div class="stop-controls"><label class="stop-done"><input class="day-stop-check" data-stop="sex-0" type="checkbox"/><span>feito</span></label><button aria-label="Favoritar parada" class="fav-btn" data-fav="sex-0" type="button">☆</button></div>
+</div>
+<div class="stop" data-stop-key="sex-1" data-stop-title="Três Corações — abastecer e comer">
+<div class="time">~00h30–01h15</div>
+<div>
+<strong>⛽🍽️ 1ª parada — Três Corações</strong><span class="priority-badge must">Abastecimento principal</span>
+<p><strong>Posto Trevo Marins</strong><br/>BR-381, km 744 — Distrito Industrial, Três Corações/MG • CEP 37410-000.</p>
+<p><strong>Para comer:</strong> região do km 744 / Pampas Grill 3. Aqui é a melhor parada para banheiro, café e uma refeição/lanche mais completo.</p>
+<p><strong>Combustível:</strong> depois de ~295 km, completar o tanque. Estimativa conservadora: devem entrar cerca de <strong>19–22 L</strong> de gasolina. Isso elimina a preocupação de autonomia no restante da madrugada.</p>
+<p><strong>Tempo da parada:</strong> 20 min se for só café/banheiro; <strong>25–35 min</strong> se forem comer.</p>
+<div class="stop-route-links"><a class="mini-route" href="https://www.google.com/maps/search/?api=1&amp;query=Posto+Trevo+Marins,+BR-381+km+744,+Tres+Coracoes,+MG" rel="noopener" target="_blank">Maps</a><a class="mini-route" href="https://www.waze.com/ul?q=Posto%20Trevo%20Marins%2C%20Tres%20Coracoes%2C%20MG&amp;navigate=yes" rel="noopener" target="_blank">Waze</a></div>
+</div>
+<div class="stop-controls"><label class="stop-done"><input class="day-stop-check" data-stop="sex-1" type="checkbox"/><span>feito</span></label><button aria-label="Favoritar parada" class="fav-btn" data-fav="sex-1" type="button">☆</button></div>
+</div>
+<div class="stop" data-stop-key="sex-2" data-stop-title="Taubaté — café antes da serra">
+<div class="time">~04h–05h10</div>
+<div>
+<strong>☕⛽ 2ª parada — Taubaté, antes da Oswaldo Cruz</strong><span class="priority-badge">Pausa estratégica</span>
+<p><strong>Auto Posto Cerejeira Shell</strong><br/>Rodovia Oswaldo Cruz, 1640 — Jardim Julieta, Taubaté/SP • CEP 12090-700.</p>
+<p><strong>Trecho desde Três Corações:</strong> ~232 km • ~3h15–3h35.</p>
+<p><strong>Para comer:</strong> parada pensada principalmente para café, água, salgado/pão de queijo e banheiro. É a pausa de segurança antes do trecho sinuoso da serra.</p>
+<p><strong>Combustível:</strong> abastecer aqui é <strong>opcional</strong>. Como o tanque foi completado em Três Corações, haverá combustível de sobra. Se quiserem chegar a Ubatuba quase cheios, basta completar novamente.</p>
+<p><strong>Tempo da parada:</strong> ~15–20 min. Se houver sono, priorizem descanso em vez de cumprir horário.</p>
+<div class="stop-route-links"><a class="mini-route" href="https://www.google.com/maps/search/?api=1&amp;query=Auto+Posto+Cerejeira+Shell,+Rodovia+Oswaldo+Cruz+1640,+Taubate,+SP" rel="noopener" target="_blank">Maps</a><a class="mini-route" href="https://www.waze.com/ul?q=Rodovia%20Oswaldo%20Cruz%201640%2C%20Taubate%2C%20SP&amp;navigate=yes" rel="noopener" target="_blank">Waze</a></div>
+</div>
+<div class="stop-controls"><label class="stop-done"><input class="day-stop-check" data-stop="sex-2" type="checkbox"/><span>feito</span></label><button aria-label="Favoritar parada" class="fav-btn" data-fav="sex-2" type="button">☆</button></div>
+</div>
+<div class="stop" data-stop-key="sex-3" data-stop-title="Taubaté até Ubatuba — serra">
+<div class="time">~05h–07h30</div>
+<div>
+<strong>⛰️ Trecho final — Taubaté → Ubatuba</strong><span class="priority-badge must">Atenção na serra</span>
+<p><strong>Distância:</strong> ~97–101 km • ~1h50–2h. A velocidade média cai na Rodovia Oswaldo Cruz por causa das curvas e da descida da serra.</p>
+<p><strong>Combustível estimado:</strong> ~6–8 L no trecho final. Saindo de Três Corações com o tanque cheio, a autonomia é mais do que suficiente mesmo sem completar em Taubaté.</p>
+<p>Sem pressa na descida. Se houver chuva, neblina ou cansaço, reduzam o ritmo.</p>
+<div class="stop-route-links"><a class="mini-route" href="https://www.google.com/maps/dir/?api=1&amp;origin=Rodovia+Oswaldo+Cruz,+1640,+Taubate,+SP&amp;destination=Rodovia+Oswaldo+Cruz,+4502,+Ubatuba,+SP" rel="noopener" target="_blank">Maps</a><a class="mini-route" href="https://www.waze.com/ul?q=Rodovia%20Oswaldo%20Cruz%204502%2C%20Ubatuba%2C%20SP&amp;navigate=yes" rel="noopener" target="_blank">Waze</a></div>
+</div>
+<div class="stop-controls"><label class="stop-done"><input class="day-stop-check" data-stop="sex-3" type="checkbox"/><span>feito</span></label><button aria-label="Favoritar parada" class="fav-btn" data-fav="sex-3" type="button">☆</button></div>
+</div>
+<div class="stop" data-stop-key="sex-4" data-stop-title="Chegada à região do Horto/Ubatuba">
+<div class="time">~06h30–07h30</div>
+<div>
+<strong>🌴 Chegada a Ubatuba</strong><span class="priority-badge must">~625 km totais</span>
+<p><strong>Referência:</strong> Garden Eco-lodge / Ubatuba Country Club — Rodovia Oswaldo Cruz, 4502, Ubatuba/SP.</p>
+<p>Como o check-in é só à tarde, não precisam ir direto para o loft. A ideia é tomar café, reorganizar o carro e seguir para o roteiro do sábado.</p>
+<p><strong>Resumo da madrugada:</strong> duas paradas apenas, com combustível + comida + banheiro concentrados nelas. Três Corações é a parada principal; Taubaté é a pausa antes da serra.</p>
+<div class="stop-route-links"><a class="mini-route" href="https://www.google.com/maps/search/?api=1&amp;query=Rodovia+Oswaldo+Cruz,+4502,+Ubatuba,+SP" rel="noopener" target="_blank">Maps</a><a class="mini-route" href="https://www.waze.com/ul?q=Rodovia%20Oswaldo%20Cruz%204502%2C%20Ubatuba%2C%20SP&amp;navigate=yes" rel="noopener" target="_blank">Waze</a></div>
+</div>
+<div class="stop-controls"><label class="stop-done"><input class="day-stop-check" data-stop="sex-4" type="checkbox"/><span>feito</span></label><button aria-label="Favoritar parada" class="fav-btn" data-fav="sex-4" type="button">☆</button></div>
+</div>
 </div>
 </div>
 </div>
@@ -3560,7 +3711,7 @@
 <label class="check-item" data-item-key="ziplock"><input data-pack="ziplock" type="checkbox"/><span class="item-text">Saco estanque/ziplock para celular e documentos</span><select aria-label="Responsável" class="owner-select" data-owner-key="ziplock"><option value="nos">Nós</option><option value="alexandre">Alexandre</option><option value="yasmin">Yasmin</option></select><div class="item-actions"><button aria-label="Editar item" class="item-action edit-item" data-edit-key="ziplock" title="Editar item" type="button">✎</button><button aria-label="Excluir item" class="item-action delete-item" data-delete-key="ziplock" title="Excluir item" type="button">×</button></div></label>
 </div>
 <div class="checklist-card" data-check-category="cat-4"><div class="checklist-card-header"><h4>🚗 BH ↔ Ubatuba • Kwid 2019 + estrada</h4><button class="add-check-item" data-add-category="cat-4" type="button">+ Adicionar</button></div>
-<label class="check-item" data-item-key="combustivel"><input data-pack="combustivel" type="checkbox"/><span class="item-text">Abastecer antes de sair de BH</span><select aria-label="Responsável" class="owner-select" data-owner-key="combustivel"><option value="nos">Nós</option><option value="alexandre">Alexandre</option><option value="yasmin">Yasmin</option></select><div class="item-actions"><button aria-label="Editar item" class="item-action edit-item" data-edit-key="combustivel" title="Editar item" type="button">✎</button><button aria-label="Excluir item" class="item-action delete-item" data-delete-key="combustivel" title="Excluir item" type="button">×</button></div></label>
+<label class="check-item" data-item-key="combustivel"><input data-pack="combustivel" type="checkbox"/><span class="item-text">Abastecer antes de sair de BH</span><select aria-label="Responsável" class="owner-select" data-owner-key="combustivel"><option value="nos">Nós</option><option value="alexandre">Alexandre</option><option value="yasmin">Yasmin</option></select><div class="item-actions"><button aria-label="Editar item" class="item-action edit-item" data-edit-key="combustivel" title="Editar item" type="button">✎</button><button aria-label="Excluir item" class="item-action delete-item" data-delete-key="combustivel" title="Excluir item" type="button">×</button></div></label><label class="check-item" data-item-key="abastecer-tres-coracoes"><input data-pack="abastecer-tres-coracoes" type="checkbox"/><span class="item-text">Três Corações: completar o tanque no km 744 da BR-381</span><select aria-label="Responsável" class="owner-select" data-owner-key="abastecer-tres-coracoes"><option value="nos">Nós</option><option value="alexandre">Alexandre</option><option value="yasmin">Yasmin</option></select><div class="item-actions"><button aria-label="Editar item" class="item-action edit-item" data-edit-key="abastecer-tres-coracoes" title="Editar item" type="button">✎</button><button aria-label="Excluir item" class="item-action delete-item" data-delete-key="abastecer-tres-coracoes" title="Excluir item" type="button">×</button></div></label><label class="check-item" data-item-key="parada-taubate"><input data-pack="parada-taubate" type="checkbox"/><span class="item-text">Taubaté: pausa para café/banheiro antes da Rodovia Oswaldo Cruz</span><select aria-label="Responsável" class="owner-select" data-owner-key="parada-taubate"><option value="nos">Nós</option><option value="alexandre">Alexandre</option><option value="yasmin">Yasmin</option></select><div class="item-actions"><button aria-label="Editar item" class="item-action edit-item" data-edit-key="parada-taubate" title="Editar item" type="button">✎</button><button aria-label="Excluir item" class="item-action delete-item" data-delete-key="parada-taubate" title="Excluir item" type="button">×</button></div></label>
 <label class="check-item" data-item-key="pneus"><input data-pack="pneus" type="checkbox"/><span class="item-text">Conferir pneus e estepe</span><select aria-label="Responsável" class="owner-select" data-owner-key="pneus"><option value="nos">Nós</option><option value="alexandre">Alexandre</option><option value="yasmin">Yasmin</option></select><div class="item-actions"><button aria-label="Editar item" class="item-action edit-item" data-edit-key="pneus" title="Editar item" type="button">✎</button><button aria-label="Excluir item" class="item-action delete-item" data-delete-key="pneus" title="Excluir item" type="button">×</button></div></label>
 <label class="check-item" data-item-key="oleo"><input data-pack="oleo" type="checkbox"/><span class="item-text">Conferir óleo e fluidos</span><select aria-label="Responsável" class="owner-select" data-owner-key="oleo"><option value="nos">Nós</option><option value="alexandre">Alexandre</option><option value="yasmin">Yasmin</option></select><div class="item-actions"><button aria-label="Editar item" class="item-action edit-item" data-edit-key="oleo" title="Editar item" type="button">✎</button><button aria-label="Excluir item" class="item-action delete-item" data-delete-key="oleo" title="Excluir item" type="button">×</button></div></label>
 <label class="check-item" data-item-key="doc-carro"><input data-pack="doc-carro" type="checkbox"/><span class="item-text">Documento do carro e CNH</span><select aria-label="Responsável" class="owner-select" data-owner-key="doc-carro"><option value="nos">Nós</option><option value="alexandre">Alexandre</option><option value="yasmin">Yasmin</option></select><div class="item-actions"><button aria-label="Editar item" class="item-action edit-item" data-edit-key="doc-carro" title="Editar item" type="button">✎</button><button aria-label="Excluir item" class="item-action delete-item" data-delete-key="doc-carro" title="Excluir item" type="button">×</button></div></label>
@@ -3622,27 +3773,7 @@
           </div></div>
 <p class="tiny-note"><strong>Dica:</strong> como o loft tem cozinha completa e varanda, levar um pequeno kit de café da manhã e lanches faz bastante sentido e ajuda a controlar o orçamento.</p>
 </div>
-<div class="card glass" id="marketChecklistShared"><h3>🛒 Checklist da compra do mercado</h3><p class="section-sub">Marque o que já compraram. Salva automaticamente neste aparelho e sincroniza com a viagem compartilhada.</p><div class="mini-progress-block">
-<div><strong>Compra do mercado</strong><span id="marketCount">0 / 0</span></div>
-<div class="mini-progress"><span id="marketProgress"></span></div>
-</div><div class="qty-list">
-<div class="qty-item"><input class="market-check" data-market="item-0" type="checkbox"/><span>☕ <b>Café:</b> 250 g ou 8–10 cápsulas</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-1" type="checkbox"/><span>🥛 <b>Leite:</b> 1 litro</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-2" type="checkbox"/><span>🥖 <b>Pão:</b> 1 pacote ou 6–8 pães</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-3" type="checkbox"/><span>🥚 <b>Ovos:</b> 6 unidades</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-4" type="checkbox"/><span>🧀 <b>Queijo:</b> ~200 g</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-5" type="checkbox"/><span>🥓 <b>Frios:</b> ~150–200 g</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-6" type="checkbox"/><span>🧈 <b>Manteiga/requeijão:</b> 1 unidade</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-7" type="checkbox"/><span>🍌 <b>Frutas:</b> 6–8 unidades variadas</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-8" type="checkbox"/><span>🥣 <b>Iogurte:</b> 2–4 unidades</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-9" type="checkbox"/><span>💧 <b>Água:</b> pelo menos 5–6 litros no total</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-10" type="checkbox"/><span>🧃 <b>Água de coco/suco:</b> 4 unidades ou 1 litro</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-11" type="checkbox"/><span>🥜 <b>Castanhas/amendoim:</b> 1 pacote pequeno</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-12" type="checkbox"/><span>🍪 <b>Biscoito/cracker:</b> 1 pacote</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-13" type="checkbox"/><span>🥪 <b>Sanduíche:</b> tomate + folhas + frios</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-14" type="checkbox"/><span>🧊 <b>Gelo:</b> bolsa térmica ou gelo reutilizável</span></div>
-<div class="qty-item"><input class="market-check" data-market="item-15" type="checkbox"/><span>🍷 <b>Varanda:</b> vinho/bebida + chocolate opcional</span></div>
-</div></div></section>
+</section>
 <section class="section budget-grid reveal" id="gastos"><div class="card glass reveal expense-tracker">
 <div class="pill">Previsto × gasto real</div>
 <h3>Controle durante a viagem</h3>
@@ -4135,7 +4266,7 @@
     catch(e){ return {}; }
   }
   function setState(s){
-    try { const latest=getState(); localStorage.setItem(APP_KEY, JSON.stringify({...latest,...s,checks:latest.checks||s.checks,owners:latest.owners||s.owners})); } catch(e){}
+    try { localStorage.setItem(APP_KEY, JSON.stringify(s)); } catch(e){}
   }
   function currency(v){
     return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
@@ -4151,6 +4282,9 @@
   let state=getState();
   state.checks=state.checks||{};
   state.market=state.market||{};
+  state.marketItems=state.marketItems||{};
+  state.marketDeleted=Array.isArray(state.marketDeleted)?state.marketDeleted:[];
+  state.marketEdits=state.marketEdits||{};
   state.stops=state.stops||{};
   state.favs=state.favs||{};
   state.owners=state.owners||{};
@@ -4178,20 +4312,206 @@
     sel.addEventListener('change',()=>{state.owners[k]=sel.value;setState(state);});
   });
 
-  // Market checklist
-  const market=[...document.querySelectorAll('.market-check')];
-  market.forEach(i=>{
-    const k=i.dataset.market;
-    i.checked=!!state.market[k];
-    i.addEventListener('change',()=>{state.market[k]=i.checked;setState(state);updateMarket();});
-  });
+  // Market checklist — editável + sincronizado
+  const marketList=document.querySelector('#mercado .qty-list');
+
+  function notifyMarketCloud(){
+    document.dispatchEvent(new CustomEvent('ubatuba:state-changed',{detail:{source:'market'}}));
+  }
+  function marketInputs(){
+    return [...document.querySelectorAll('#mercado .market-check')];
+  }
+  function marketRow(key){
+    const input=document.querySelector('#mercado .market-check[data-market="'+CSS.escape(key)+'"]');
+    return input?.closest('.qty-item')||null;
+  }
+  function makeMarketActions(key){
+    const wrap=document.createElement('div');
+    wrap.className='market-item-actions';
+
+    const edit=document.createElement('button');
+    edit.type='button';edit.className='market-item-action market-edit';
+    edit.dataset.marketEdit=key;edit.title='Editar item';edit.setAttribute('aria-label','Editar item');
+    edit.textContent='✎';
+
+    const del=document.createElement('button');
+    del.type='button';del.className='market-item-action market-delete';
+    del.dataset.marketDelete=key;del.title='Remover item';del.setAttribute('aria-label','Remover item');
+    del.textContent='×';
+
+    wrap.append(edit,del);
+    return wrap;
+  }
+  function prepareMarketRow(row,key){
+    if(!row)return;
+    const text=row.querySelector('span');
+    if(text)text.classList.add('market-item-text');
+    if(!row.querySelector('.market-item-actions'))row.appendChild(makeMarketActions(key));
+  }
+  function renderCustomMarketItem(key,data){
+    if(!marketList || marketRow(key))return;
+    const row=document.createElement('div');
+    row.className='qty-item';
+    row.dataset.marketRow=key;
+
+    const input=document.createElement('input');
+    input.className='market-check';
+    input.type='checkbox';
+    input.dataset.market=key;
+    input.checked=!!state.market[key];
+
+    const text=document.createElement('span');
+    text.className='market-item-text';
+    text.textContent=data?.text||'Item';
+
+    row.append(input,text,makeMarketActions(key));
+    marketList.appendChild(row);
+  }
+  function applyMarketStructure(){
+    // itens padrão
+    [...document.querySelectorAll('#mercado .market-check[data-market^="item-"]')].forEach(input=>{
+      const key=input.dataset.market;
+      const row=input.closest('.qty-item');
+      if(state.marketDeleted.includes(key)){row?.remove();return;}
+      const text=row?.querySelector('span');
+      if(text && state.marketEdits[key])text.textContent=state.marketEdits[key];
+      prepareMarketRow(row,key);
+    });
+
+    // itens criados pelo casal
+    Object.entries(state.marketItems||{}).forEach(([key,data])=>renderCustomMarketItem(key,data));
+
+    // restaura marcações
+    marketInputs().forEach(input=>{
+      input.checked=!!state.market[input.dataset.market];
+      prepareMarketRow(input.closest('.qty-item'),input.dataset.market);
+    });
+  }
   function updateMarket(){
+    const market=marketInputs();
     const done=market.filter(i=>i.checked).length,total=market.length;
     const c=document.getElementById('marketCount'), b=document.getElementById('marketProgress');
     if(c)c.textContent=done+' / '+total;
     if(b)b.style.width=(total?done/total*100:0)+'%';
   }
+
+  applyMarketStructure();
   updateMarket();
+
+  marketList?.addEventListener('change',e=>{
+    if(!e.target.matches('.market-check'))return;
+    const key=e.target.dataset.market;
+    state.market[key]=e.target.checked;
+    if(state.marketItems[key])state.marketItems[key].checked=e.target.checked;
+    setState(state);
+    updateMarket();
+    notifyMarketCloud();
+  });
+
+  const marketModal=document.getElementById('marketEditorBackdrop');
+  const marketModalTitle=document.getElementById('marketEditorTitle');
+  const marketModalCopy=document.getElementById('marketEditorCopy');
+  const marketModalText=document.getElementById('marketEditorText');
+  const marketModalSave=document.getElementById('marketEditorSave');
+  let marketModalMode='add';
+  let marketModalKey=null;
+
+  function marketTextFor(key){
+    if(state.marketItems[key])return state.marketItems[key].text||'';
+    const row=marketRow(key);
+    return (row?.querySelector('.market-item-text')?.textContent||'').trim();
+  }
+  function openMarketModal(mode,key=null){
+    marketModalMode=mode;marketModalKey=key;
+    marketModalSave.classList.remove('danger');
+    marketModalSave.classList.add('primary');
+    marketModalText.hidden=false;
+
+    if(mode==='add'){
+      marketModalTitle.textContent='Adicionar item ao mercado';
+      marketModalCopy.textContent='Digite o item que vocês querem incluir na compra.';
+      marketModalText.value='';
+      marketModalSave.textContent='Adicionar';
+    }else if(mode==='edit'){
+      marketModalTitle.textContent='Editar item do mercado';
+      marketModalCopy.textContent='Altere o texto do item.';
+      marketModalText.value=marketTextFor(key);
+      marketModalSave.textContent='Salvar';
+    }else{
+      marketModalTitle.textContent='Remover item?';
+      marketModalCopy.textContent='“'+marketTextFor(key)+'” será removido da lista do mercado.';
+      marketModalText.hidden=true;
+      marketModalSave.textContent='Remover';
+      marketModalSave.classList.remove('primary');
+      marketModalSave.classList.add('danger');
+    }
+
+    marketModal.hidden=false;
+    if(mode!=='delete')setTimeout(()=>marketModalText.focus(),40);
+  }
+  function closeMarketModal(){
+    marketModal.hidden=true;
+    marketModalMode='add';
+    marketModalKey=null;
+  }
+
+  document.getElementById('addMarketItemBtn')?.addEventListener('click',()=>openMarketModal('add'));
+  document.getElementById('marketEditorCancel')?.addEventListener('click',closeMarketModal);
+  marketModal?.addEventListener('click',e=>{if(e.target===marketModal)closeMarketModal();});
+
+  marketList?.addEventListener('click',e=>{
+    const edit=e.target.closest('[data-market-edit]');
+    if(edit){openMarketModal('edit',edit.dataset.marketEdit);return;}
+    const del=e.target.closest('[data-market-delete]');
+    if(del){openMarketModal('delete',del.dataset.marketDelete);}
+  });
+
+  marketModalSave?.addEventListener('click',()=>{
+    if(marketModalMode==='delete'){
+      const key=marketModalKey;
+      if(!key)return;
+      if(key.startsWith('market-custom-')){
+        delete state.marketItems[key];
+      }else if(!state.marketDeleted.includes(key)){
+        state.marketDeleted.push(key);
+      }
+      delete state.market[key];
+      delete state.marketEdits[key];
+      marketRow(key)?.remove();
+      setState(state);
+      updateMarket();
+      closeMarketModal();
+      toast('Item removido do mercado');
+      notifyMarketCloud();
+      return;
+    }
+
+    const value=(marketModalText.value||'').trim();
+    if(!value){marketModalText.focus();return;}
+
+    if(marketModalMode==='add'){
+      const key='market-custom-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+      state.marketItems[key]={text:value,checked:false};
+      state.market[key]=false;
+      renderCustomMarketItem(key,state.marketItems[key]);
+      toast('Item adicionado ao mercado');
+    }else if(marketModalMode==='edit' && marketModalKey){
+      const key=marketModalKey;
+      if(state.marketItems[key]){
+        state.marketItems[key].text=value;
+      }else{
+        state.marketEdits[key]=value;
+      }
+      const text=marketRow(key)?.querySelector('.market-item-text');
+      if(text)text.textContent=value;
+      toast('Item do mercado atualizado');
+    }
+
+    setState(state);
+    updateMarket();
+    closeMarketModal();
+    notifyMarketCloud();
+  });
 
   // Stops + favorites
   const stopChecks=[...document.querySelectorAll('.day-stop-check')];
@@ -4465,7 +4785,6 @@
 <label class="modal-field">
 <span>Código da viagem</span>
 <input autocomplete="off" id="tripCodeInput" maxlength="12" placeholder="Ex.: A7K9P2" type="text"/>
-<p id="tripJoinError" role="alert" hidden style="color:#ffb4ab;white-space:pre-wrap;overflow-wrap:anywhere"></p>
 </label>
 <div class="modal-actions">
 <button class="modal-btn subtle" id="tripJoinBack" type="button">Voltar</button>
@@ -4497,7 +4816,7 @@
     catch(e){ return fallback; }
   }
   function saveJSON(key, value){
-    try { if(key===APP_KEY && value===app){const latest=safeJSON(APP_KEY,{});value={...latest,checks:app.checks,owners:app.owners};} localStorage.setItem(key, JSON.stringify(value)); } catch(e){}
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){}
   }
   function makeId(prefix='custom'){
     return prefix+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
@@ -4846,28 +5165,8 @@
   let cloudSaveTimer=null;
   let applyingCloud=false;
 
-  // Public browser configuration; keep the existing storage keys and trip data.
-  const PUBLIC_SUPABASE_CONFIG=Object.freeze({
-    url:'https://ckppsebkjwsdgircxcyh.supabase.co',
-    anonKey:"sb_publishable_aLKcwtNKLNI5TzT67OzabQ_-a8IN0Mb"
-  });
-  const OAUTH_RETURN_KEY='ubatuba-oauth-return-to-trip';
-  const oauthParams=new URLSearchParams(location.hash.slice(1));
-  const oauthQuery=new URLSearchParams(location.search);
-  if(oauthParams.has('access_token') || oauthQuery.has('code')){
-    sessionStorage.setItem(OAUTH_RETURN_KEY,'1');
-  }
-  function getConfig(){return PUBLIC_SUPABASE_CONFIG;}
-  function resumeSharedTrip(){
-    if(!sbSession || !sessionStorage.getItem(OAUTH_RETURN_KEY))return;
-    sessionStorage.removeItem(OAUTH_RETURN_KEY);
-    document.getElementById('checklist')?.scrollIntoView({behavior:'smooth'});
-    openTrip();
-    if(!activeTrip?.id){
-      document.getElementById('tripNoActive').hidden=true;
-      document.getElementById('tripJoinForm').hidden=false;
-      document.getElementById('tripCodeInput').focus();
-    }
+  function getConfig(){
+    return safeJSON(SUPABASE_CONFIG_KEY,{url:'',anonKey:''});
   }
   function configured(){
     const c=getConfig();
@@ -4926,24 +5225,19 @@
     });
     const {data}=await sb.auth.getSession();
     sbSession=data.session||null;
-    sb.auth.onAuthStateChange((event,session)=>{
+    sb.auth.onAuthStateChange(async(event,session)=>{
       sbSession=session||null;
       renderCloudStatus();
-      // Run database calls after the auth callback has returned.
-      setTimeout(async()=>{
-        if(sbSession && activeTrip?.id){
-          await loadCloudState();
-          subscribeRealtime();
-        }
-        resumeSharedTrip();
-      },0);
+      if(sbSession && activeTrip?.id){
+        await loadCloudState();
+        subscribeRealtime();
+      }
     });
     renderCloudStatus();
     if(sbSession && activeTrip?.id){
       await loadCloudState();
       subscribeRealtime();
     }
-    resumeSharedTrip();
   }
 
   // Cloud settings modal
@@ -4955,8 +5249,7 @@
     cloudSettings.hidden=false;
   }
   function closeCloudSettings(){cloudSettings.hidden=true;}
-  const configButton=document.getElementById('cloudSettingsBtn');
-  if(configButton)configButton.hidden=true;
+  document.getElementById('cloudSettingsBtn')?.addEventListener('click',openCloudSettings);
   document.getElementById('cloudSettingsClose')?.addEventListener('click',closeCloudSettings);
   document.getElementById('cloudSettingsCancel')?.addEventListener('click',closeCloudSettings);
   cloudSettings?.addEventListener('click',e=>{if(e.target===cloudSettings)closeCloudSettings();});
@@ -4986,13 +5279,11 @@
     }
     if(!sb){await initSupabase();}
     if(!sb)return;
-    sessionStorage.setItem(OAUTH_RETURN_KEY,'1');
     const redirectTo=location.origin+location.pathname;
-    const {error}=await sb.auth.signInWithOAuth({
+    await sb.auth.signInWithOAuth({
       provider:'google',
       options:{redirectTo,queryParams:{access_type:'offline',prompt:'consent'}}
     });
-    if(error){sessionStorage.removeItem(OAUTH_RETURN_KEY);toast('Não foi possível entrar com Google: '+error.message);}
   });
   document.getElementById('googleLogoutBtn')?.addEventListener('click',async()=>{
     if(sb)await sb.auth.signOut();
@@ -5060,10 +5351,7 @@
 
   document.getElementById('joinTripBtn')?.addEventListener('click',async()=>{
     if(!sbSession||!sb){toast('Entre com Google primeiro');return;}
-    const code=document.getElementById('tripCodeInput').value.replace(/\s+/g,'').toUpperCase();
-    const errorBox=document.getElementById('tripJoinError');
-    errorBox.hidden=true;
-    errorBox.textContent='';
+    const code=document.getElementById('tripCodeInput').value.trim().toUpperCase();
     if(!code){toast('Digite o código da viagem');return;}
     const btn=document.getElementById('joinTripBtn');
     if(btn){btn.disabled=true;btn.style.opacity='.65';}
@@ -5071,10 +5359,7 @@
       const {data,error}=await sb.rpc('join_shared_trip',{invite_code_input:code});
       if(error){
         console.error('join_shared_trip:',error);
-        const message='Não foi possível entrar: '+(error.message||'Erro do servidor')+(error.code?' (código '+error.code+')':'');
-        errorBox.textContent=message;
-        errorBox.hidden=false;
-        toast('Veja o motivo abaixo do campo do código');
+        toast('Código inválido ou acesso negado');
         return;
       }
       const row=Array.isArray(data)?data[0]:data;
@@ -5107,7 +5392,7 @@
 
   function collectState(){
     return {
-      version:22,
+      version:27,
       updatedAt:new Date().toISOString(),
       deviceId:deviceId(),
       app:safeJSON(APP_KEY,{}),
@@ -5141,6 +5426,8 @@
     clearTimeout(cloudSaveTimer);
     cloudSaveTimer=setTimeout(()=>saveCloudState(false),700);
   }
+
+  document.addEventListener('ubatuba:state-changed',()=>scheduleCloudSave());
 
   async function loadCloudState(force=false){
     if(!sb||!sbSession||!activeTrip?.id)return;
@@ -5190,5 +5477,5 @@
   renderCloudStatus();
   initSupabase().catch(console.error);
 })();
-</script></body>
+</script><div class="market-modal-backdrop" hidden="" id="marketEditorBackdrop"><div aria-modal="true" class="market-modal" role="dialog"><h3 id="marketEditorTitle">Adicionar item ao mercado</h3><p id="marketEditorCopy">Digite o item que vocês querem incluir na compra.</p><input autocomplete="off" id="marketEditorText" maxlength="140" placeholder="Ex.: protetor solar, refrigerante, queijo..." type="text"/><div class="market-modal-actions"><button class="market-modal-btn" id="marketEditorCancel" type="button">Cancelar</button><button class="market-modal-btn primary" id="marketEditorSave" type="button">Adicionar</button></div></div></div></body>
 </html>
