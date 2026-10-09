@@ -2936,15 +2936,44 @@ body.v30-auth-lock{overflow:hidden}
 .v30-trip-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}.v30-join-box{margin-top:14px}.v30-join-box[hidden]{display:none!important}
 .v30-join-box input{width:100%;box-sizing:border-box;padding:13px;border-radius:14px;background:#080d12;color:#fff;border:1px solid rgba(255,255,255,.11);font:inherit;text-transform:uppercase;letter-spacing:.12em;text-align:center;font-weight:900}
 @media(max-width:620px){.v30-trip-actions{grid-template-columns:1fr}}
+</style><style id="v31-login-visual-css">
+/* Login integrado à identidade grafite, coral e turquesa do roteiro. */
+#v30AuthGate,#v30TripGate{overflow-y:auto;padding:32px 20px;background:radial-gradient(ellipse at 12% 12%,rgba(255,100,95,.14),transparent 48%),radial-gradient(ellipse at 90% 80%,rgba(67,217,210,.12),transparent 45%),linear-gradient(145deg,#07090c,#0d1116 55%,#07090c);color:var(--text)}
+.v30-auth-card,.v30-trip-card{position:relative;isolation:isolate;overflow:hidden;width:min(560px,100%);padding:clamp(24px,5vw,44px);border-radius:32px;background:radial-gradient(circle at 0% 0%,rgba(255,100,95,.09),transparent 42%),linear-gradient(145deg,rgba(23,28,36,.96),rgba(9,12,16,.96));border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+.v30-auth-card::before,.v30-trip-card::before{content:'';position:absolute;top:0;left:32px;right:32px;height:3px;background:linear-gradient(90deg,var(--coral),var(--orange),var(--sun),var(--blue),var(--teal));border-radius:0 0 4px 4px}
+.v30-brand-icon{display:grid;place-items:center;width:64px;height:64px;margin-bottom:22px;border-radius:21px;font-size:2rem;background:linear-gradient(135deg,rgba(67,217,210,.16),rgba(101,183,255,.08));border:1px solid rgba(67,217,210,.2)}
+.v30-kicker{margin:0 0 10px;color:var(--sun);font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.v30-auth-card h1{margin:0;font-size:clamp(2rem,7vw,3rem);line-height:1.12;letter-spacing:-.055em;background:linear-gradient(92deg,var(--coral),var(--orange) 28%,var(--sun) 50%,var(--blue) 75%,var(--teal));background-clip:text;-webkit-background-clip:text;color:transparent}
+.v30-trip-card h2{margin:0 0 12px;font-size:clamp(1.5rem,5vw,2rem);line-height:1.2;letter-spacing:-.035em;color:var(--text)}
+.v30-auth-card p:not(.v30-kicker),.v30-trip-card p{color:var(--muted);margin:18px 0 22px;font-size:.95rem;line-height:1.7}
+.v30-auth-features{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px;padding:0;list-style:none}
+.v30-auth-features li{padding:6px 10px;border-radius:999px;font-size:.75rem;color:#cbd4d9;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.v30-auth-status,.v30-trip-meta{color:var(--muted);background:rgba(67,217,210,.045);border-color:rgba(67,217,210,.12);line-height:1.55}
+.v30-auth-actions{gap:10px;margin-top:20px}
+.v30-google,.v30-secondary,.v30-primary{display:flex;align-items:center;justify-content:center;gap:12px;min-height:52px;border-radius:16px;font-size:.9rem;transition:transform .18s,box-shadow .18s,border-color .18s}
+.v30-google{background:linear-gradient(100deg,var(--teal),#8cebe6);color:#071113;border-color:rgba(67,217,210,.3);box-shadow:0 8px 24px rgba(67,217,210,.12)}
+.v30-google svg{width:22px;height:22px;flex-shrink:0;background:#fff;border-radius:50%;padding:3px}
+.v30-primary{background:linear-gradient(100deg,var(--teal),#8cebe6);color:#071113}
+.v30-secondary{background:rgba(255,255,255,.035);color:var(--muted);border-color:var(--line)}
+.v30-google:hover,.v30-primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(67,217,210,.2)}
+.v30-secondary:hover{color:var(--text);background:rgba(255,255,255,.065);border-color:rgba(255,255,255,.18)}
+.v30-google:focus-visible,.v30-secondary:focus-visible,.v30-primary:focus-visible,.v30-join-box input:focus-visible{outline:3px solid var(--sun);outline-offset:4px}
+.v30-auth-card small{display:block;margin-top:22px;text-align:center;color:var(--muted);font-size:.75rem;line-height:1.6}
+.v30-join-box label{display:block;margin-bottom:8px;color:var(--muted);font-size:.82rem}
+.v30-join-box input{min-height:52px;border-color:rgba(67,217,210,.18);background:rgba(0,0,0,.18)}
+@media(max-width:620px){#v30AuthGate,#v30TripGate{padding:24px 16px;padding-top:max(24px,env(safe-area-inset-top));padding-bottom:max(24px,env(safe-area-inset-bottom))}.v30-auth-card,.v30-trip-card{border-radius:26px}}
+@media(max-height:680px){#v30AuthGate,#v30TripGate{place-items:start center}}
+@media(prefers-reduced-motion:reduce){.v30-google,.v30-primary,.v30-secondary{transition:none}}
 </style></head>
 <body><div id="v30AuthGate">
 <div class="v30-auth-card">
 <div style="font-size:2rem">🌊</div>
 <h1>Ubatuba a Dois</h1>
 <p>Entre com Google para carregar automaticamente a viagem compartilhada, o checklist, o mercado e o progresso de vocês.</p>
-<div class="v30-auth-status" id="v30AuthStatus">Verificando sua sessão…</div>
+<ul class="v30-auth-features" aria-label="Sua viagem em um só lugar"><li>Roteiro a dois</li><li>Checklist compartilhado</li><li>Progresso sincronizado</li></ul>
+<div class="v30-auth-status" role="status" aria-live="polite" id="v30AuthStatus">Verificando sua sessão…</div>
 <div class="v30-auth-actions">
-<button class="v30-google" id="v30GateGoogle" type="button">G  Entrar com Google</button>
+<button class="v30-google" id="v30GateGoogle" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-1.99 3.02v2.51h3.23c1.89-1.74 2.98-4.3 2.98-7.36Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.23-2.51c-.9.6-2.04.96-3.39.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.41 13.92A6 6 0 0 1 6.1 12c0-.67.11-1.31.31-1.92V7.49H3.07A10 10 0 0 0 2 12c0 1.61.38 3.14 1.07 4.51l3.34-2.59Z"/><path fill="#EA4335" d="M12 5.96c1.47 0 2.79.5 3.83 1.51l2.87-2.87A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.49l3.34 2.59A5.99 5.99 0 0 1 12 5.96Z"/></svg><span>Entrar com Google</span></button>
 <button class="v30-secondary" id="v30ContinueOffline" type="button">Continuar sem sincronizar</button>
 </div>
 <small>Em um aparelho novo você não precisa configurar URL ou chave.</small>
@@ -2959,7 +2988,7 @@ body.v30-auth-lock{overflow:hidden}
 <button class="v30-secondary" id="v30ShowJoin" type="button">Entrar com código</button>
 </div>
 <div class="v30-join-box" hidden="" id="v30JoinBox">
-<input autocomplete="off" id="v30JoinCode" maxlength="12" placeholder="CÓDIGO"/>
+<label for="v30JoinCode">Código da viagem</label><input autocapitalize="characters" spellcheck="false" autocomplete="off" id="v30JoinCode" maxlength="12" placeholder="CÓDIGO"/>
 <div class="v30-auth-actions">
 <button class="v30-primary" id="v30JoinTrip" type="button">Entrar na viagem</button>
 <button class="v30-secondary" id="v30CancelJoin" type="button">Voltar</button>
