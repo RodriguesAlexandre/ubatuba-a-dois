@@ -2964,7 +2964,7 @@ body.v30-auth-lock{overflow:hidden}
 @media(max-width:620px){#v30AuthGate,#v30TripGate{padding:24px 16px;padding-top:max(24px,env(safe-area-inset-top));padding-bottom:max(24px,env(safe-area-inset-bottom))}.v30-auth-card,.v30-trip-card{border-radius:26px}}
 @media(max-height:680px){#v30AuthGate,#v30TripGate{place-items:start center}}
 @media(prefers-reduced-motion:reduce){.v30-google,.v30-primary,.v30-secondary{transition:none}}
-</style></head>
+</style><style>.v30-secondary[hidden]{display:none!important}.v30-primary:disabled,.v30-secondary:disabled{opacity:.55;cursor:wait}</style></head>
 <body><div id="v30AuthGate">
 <div class="v30-auth-card">
 <div style="font-size:2rem">🌊</div>
@@ -2976,7 +2976,7 @@ body.v30-auth-lock{overflow:hidden}
 <button class="v30-google" id="v30GateGoogle" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-1.99 3.02v2.51h3.23c1.89-1.74 2.98-4.3 2.98-7.36Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.23-2.51c-.9.6-2.04.96-3.39.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.41 13.92A6 6 0 0 1 6.1 12c0-.67.11-1.31.31-1.92V7.49H3.07A10 10 0 0 0 2 12c0 1.61.38 3.14 1.07 4.51l3.34-2.59Z"/><path fill="#EA4335" d="M12 5.96c1.47 0 2.79.5 3.83 1.51l2.87-2.87A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.49l3.34 2.59A5.99 5.99 0 0 1 12 5.96Z"/></svg><span>Entrar com Google</span></button>
 <button class="v30-secondary" id="v30ContinueOffline" type="button">Continuar sem sincronizar</button>
 </div>
-<small>Em um aparelho novo você não precisa configurar URL ou chave.</small>
+<small>Você e sua companhia entram com suas próprias contas Google. Compartilhem o código da viagem uma vez.</small>
 </div>
 </div><div hidden="" id="v30TripGate">
 <div class="v30-trip-card">
@@ -2993,7 +2993,7 @@ body.v30-auth-lock{overflow:hidden}
 <button class="v30-primary" id="v30JoinTrip" type="button">Entrar na viagem</button>
 <button class="v30-secondary" id="v30CancelJoin" type="button">Voltar</button>
 </div></div>
-<div class="v30-auth-actions"><button class="v30-secondary" id="v30TripLogout" type="button">Usar outra conta Google</button></div>
+<div class="v30-auth-actions"><button class="v30-secondary" id="v32RetryTrip" type="button" hidden>Tentar novamente</button><button class="v30-secondary" id="v30TripLogout" type="button">Usar outra conta Google</button></div>
 </div>
 </div>
 <div class="static-preview-note">
@@ -4325,7 +4325,7 @@ body.v30-auth-lock{overflow:hidden}
     catch(e){ return {}; }
   }
   function setState(s){
-    try { localStorage.setItem(APP_KEY, JSON.stringify(s)); } catch(e){}
+    try {const current=getState();s.checks=current.checks||s.checks;s.owners=current.owners||s.owners;localStorage.setItem(APP_KEY,JSON.stringify(s));} catch(e){}
   }
   function currency(v){
     return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
@@ -4339,6 +4339,19 @@ body.v30-auth-lock{overflow:hidden}
   }
 
   let state=getState();
+  document.addEventListener('ubatuba:cloud-applied',()=>{
+    state=getState();
+    state.checks=state.checks||{};state.owners=state.owners||{};
+    state.market=state.market||{};state.marketItems=state.marketItems||{};
+    state.marketDeleted=state.marketDeleted||[];state.marketEdits=state.marketEdits||{};
+    state.stops=state.stops||{};state.favs=state.favs||{};state.expenses=state.expenses||{};
+    marketList.innerHTML=marketTemplate;
+    applyMarketStructure();updateMarket();
+    stopChecks.forEach(input=>{input.checked=!!state.stops[input.dataset.stop];});
+    document.querySelectorAll('.fav-btn').forEach(button=>{const active=!!state.favs[button.dataset.fav];button.classList.toggle('active',active);button.textContent=active?'★':'☆';});
+    expenseInputs.forEach(input=>{input.value=state.expenses[input.dataset.expense]??'';});
+    updateDays();updateNextStop();updateExpenses();
+  });
   state.checks=state.checks||{};
   state.market=state.market||{};
   state.marketItems=state.marketItems||{};
@@ -4354,7 +4367,7 @@ body.v30-auth-lock{overflow:hidden}
   checkInputs.forEach(i=>{
     const k=i.dataset.pack;
     if(Object.prototype.hasOwnProperty.call(state.checks,k)) i.checked=!!state.checks[k];
-    i.addEventListener('change',()=>{state.checks[k]=i.checked;setState(state); updateChecklist();});
+    // Checklist changes are handled by the delegated cloud checklist module.
   });
   function updateChecklist(){
     const done=checkInputs.filter(i=>i.checked).length, total=checkInputs.length;
@@ -4368,11 +4381,12 @@ body.v30-auth-lock{overflow:hidden}
   document.querySelectorAll('.owner-select').forEach(sel=>{
     const k=sel.dataset.ownerKey;
     if(state.owners[k]) sel.value=state.owners[k];
-    sel.addEventListener('change',()=>{state.owners[k]=sel.value;setState(state);});
+    // Responsible owners are handled by the delegated cloud checklist module.
   });
 
   // Market checklist — editável + sincronizado
   const marketList=document.querySelector('#mercado .qty-list');
+  const marketTemplate=marketList?.innerHTML||'';
 
   function notifyMarketCloud(){
     document.dispatchEvent(new CustomEvent('ubatuba:state-changed',{detail:{source:'market'}}));
@@ -4880,7 +4894,10 @@ body.v30-auth-lock{overflow:hidden}
     catch(e){ return fallback; }
   }
   function saveJSON(key, value){
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){}
+    try {
+      if(key===APP_KEY && value===app)value={...safeJSON(APP_KEY,{}),checks:value.checks,owners:value.owners};
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch(e){}
   }
   function makeId(prefix='custom'){
     return prefix+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
@@ -5215,6 +5232,7 @@ body.v30-auth-lock{overflow:hidden}
     }
   });
 
+  const checklistTemplates=[...(checklistSection?.querySelectorAll('.check-item')||[])].map(el=>({parent:el.parentElement,node:el.cloneNode(true)}));
   normalizeStaticItems();
   ensureActions();
   updateChecklistUI();
@@ -5223,6 +5241,13 @@ body.v30-auth-lock{overflow:hidden}
   // Supabase + Google OAuth cloud sync
   // ----------------------------------------------------------
   let sb=null;
+  let db=null;
+  let resolvingLogin=false;
+  let resolvedUser=null;
+  let authResolutionTimer=null;
+  let cloudBaseline=null;
+  let cloudSaveBusy=false;
+  let cloudPollTimer=null;
   let sbSession=null;
   let activeTrip=safeJSON(ACTIVE_TRIP_KEY,null);
   let realtimeChannel=null;
@@ -5331,8 +5356,8 @@ body.v30-auth-lock{overflow:hidden}
 
   async function fetchTripById(tripId){
     if(!sb||!tripId)return null;
-    const {data,error}=await sb.from('trips').select('id,name,invite_code,created_at').eq('id',tripId).maybeSingle();
-    if(error){console.error('fetchTripById:',error);return null;}
+    const {data,error}=await db.from('trips').select('id,name,invite_code,created_at').eq('id',tripId).maybeSingle();
+    if(error)throw new Error('Não foi possível abrir a viagem: '+error.message);
     return data||null;
   }
 
@@ -5348,11 +5373,11 @@ body.v30-auth-lock{overflow:hidden}
   async function joinTripByCode(code,{silent=false}={}){
     code=(code||'').trim().toUpperCase();
     if(!code||!sb||!sbSession)return false;
-    const {data,error}=await sb.rpc('join_shared_trip',{invite_code_input:code});
+    const {data,error}=await db.rpc('join_shared_trip',{invite_code_input:code});
     if(error){console.error('join_shared_trip:',error);if(!silent)toast('Código inválido ou acesso negado');return false;}
     const row=Array.isArray(data)?data[0]:data;
     if(!row?.trip_id||!row?.invite_code){if(!silent)toast('Não foi possível entrar nessa viagem');return false;}
-    activeTrip={id:row.trip_id,code:row.invite_code};
+    cloudBaseline=null;activeTrip={id:row.trip_id,code:row.invite_code};
     saveJSON(ACTIVE_TRIP_KEY,activeTrip);
     clearPendingJoinCode();
     await loadCloudState(true);
@@ -5375,10 +5400,10 @@ body.v30-auth-lock{overflow:hidden}
       const input=document.getElementById('v30JoinCode'); if(input)input.value=pending;
     }
 
-    const {data:memberships,error}=await sb.from('trip_members')
+    const {data:memberships,error}=await db.from('trip_members')
       .select('trip_id,role,joined_at').eq('user_id',sbSession.user.id)
       .order('joined_at',{ascending:false});
-    if(error){console.error('trip_members discovery:',error);return false;}
+    if(error)throw new Error('Não foi possível consultar suas viagens: '+error.message);
     const rows=memberships||[];
     if(!rows.length){
       localStorage.removeItem(ACTIVE_TRIP_KEY);activeTrip=null;renderCloudStatus();return false;
@@ -5386,54 +5411,88 @@ body.v30-auth-lock{overflow:hidden}
     let chosen=activeTrip?.id?rows.find(r=>r.trip_id===activeTrip.id):null;
     if(!chosen)chosen=rows[0];
     const ok=await setActiveTripFromServer(chosen.trip_id);
-    if(!ok)return false;
+    if(!ok)throw new Error('Viagem vinculada não está disponível');
     await loadCloudState();
     subscribeRealtime();
     return true;
   }
 
+  function setTripBusy(busy){
+    ['v30CreateTrip','v30ShowJoin','v30JoinTrip'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=busy;});
+  }
+  function queueLoginResolution(){
+    if(!sbSession || resolvingLogin || resolvedUser===sbSession.user.id)return;
+    clearTimeout(authResolutionTimer);
+    authResolutionTimer=setTimeout(()=>resolveAfterLogin(),0);
+  }
   async function resolveAfterLogin(){
-    if(!sbSession)return;
-    v30SetAuthStatus('Conta conectada. Procurando sua viagem…');
-    const found=await discoverTripForSession();
-    if(found){v30HideTripGate();v30HideAuthGate();return;}
-    const email=sbSession.user?.email||'Conta Google conectada';
+    if(!sbSession || resolvingLogin)return;
+    resolvingLogin=true;
+    const userId=sbSession.user.id;
+    v30HideAuthGate();v30ShowTripGate();setTripBusy(true);
     const copy=document.getElementById('v30TripGateCopy');
-    if(copy)copy.textContent=email+' está conectado, mas ainda não pertence a uma viagem.';
-    const pending=pendingJoinCode();
-    if(pending){
-      const input=document.getElementById('v30JoinCode');
-      const box=document.getElementById('v30JoinBox');
-      if(input)input.value=pending;if(box)box.hidden=false;
-    }
-    v30HideAuthGate();v30ShowTripGate();
+    copy.textContent='Google conectado. Carregando sua viagem compartilhada…';
+    try{
+      const found=await discoverTripForSession();
+      if(!sbSession || sbSession.user.id!==userId)return;
+      resolvedUser=userId;
+      if(found){v30HideTripGate();v30HideAuthGate();return;}
+      copy.textContent=(sbSession.user.email||'Sua conta')+' está conectado. Crie a viagem uma vez ou entre com o código de quem já criou.';
+      const pending=pendingJoinCode();
+      if(pending){document.getElementById('v30JoinCode').value=pending;document.getElementById('v30JoinBox').hidden=false;}
+    }catch(error){
+      console.error('Carregar viagem:',error);
+      copy.textContent='Google conectado, mas não foi possível carregar a viagem: '+(error.message||'falha de conexão')+'. Use “Tentar novamente”.';
+      document.getElementById('v32RetryTrip').hidden=false;
+    }finally{resolvingLogin=false;setTripBusy(false);renderCloudStatus();}
   }
 
   async function initSupabase(){
-    showOAuthCallbackError();renderCloudStatus();
-    if(localStorage.getItem(OFFLINE_MODE_KEY)==='1'){v30HideAuthGate();return;}
+    renderCloudStatus();
+    const callbackParams=new URLSearchParams(location.search);
+    const callbackHash=new URLSearchParams(location.hash.replace(/^#/,''));
+    const returning=callbackParams.has('code')||callbackHash.has('access_token')||callbackHash.has('error');
+    if(localStorage.getItem(OFFLINE_MODE_KEY)==='1'&&!returning){v30HideAuthGate();return;}
+    if(returning)localStorage.removeItem(OFFLINE_MODE_KEY);
     v30ShowAuthGate('Verificando sua sessão Google…');
-    if(!configured()){v30ShowAuthGate('A configuração de nuvem não está disponível.');return;}
-    if(!window.supabase?.createClient){v30ShowAuthGate('A biblioteca de sincronização não carregou. Abra o site publicado no Safari/Chrome.');return;}
-
+    if(!configured())throw Error('Configuração de nuvem indisponível');
+    if(!window.supabase?.createClient)throw Error('Biblioteca de sincronização não carregou');
     const c=getConfig();
+    // A sessão é gerenciada pelo cliente Auth. Dados usam o token já recebido,
+    // sem chamar getSession novamente durante os eventos de autenticação.
     sb=window.supabase.createClient(c.url,c.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-    const {data,error}=await sb.auth.getSession();
-    if(error)console.error('getSession:',error);
-    sbSession=data?.session||null;renderCloudStatus();
-
-    sb.auth.onAuthStateChange(async(event,session)=>{
-      sbSession=session||null;renderCloudStatus();
-      if(event==='SIGNED_OUT'||!sbSession){
-        activeTrip=null;localStorage.removeItem(ACTIVE_TRIP_KEY);
-        v30HideTripGate();v30ShowAuthGate('Entre com Google para sincronizar a viagem.');return;
-      }
-      setTimeout(()=>resolveAfterLogin().catch(console.error),0);
+    db=window.supabase.createClient(c.url,c.anonKey,{
+      accessToken:async()=>sbSession?.access_token||null,
+      global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(15000)})}
     });
-
-    if(sbSession)await resolveAfterLogin();
-    else v30ShowAuthGate('Entre com Google para sincronizar a viagem entre os aparelhos.');
+    const {data,error}=await sb.auth.getSession();
+    if(error)throw error;
+    sbSession=data?.session||null;
+    sb.auth.onAuthStateChange((event,session)=>{
+      const previousUser=sbSession?.user.id;
+      sbSession=session||null;
+      renderCloudStatus();
+      if(event==='SIGNED_OUT'){
+        resolvedUser=null;activeTrip=null;cloudBaseline=null;
+        clearTimeout(cloudSaveTimer);clearInterval(cloudPollTimer);
+        if(realtimeChannel){db.removeChannel(realtimeChannel);realtimeChannel=null;}
+        localStorage.removeItem(ACTIVE_TRIP_KEY);
+        v30HideTripGate();v30ShowAuthGate('Sessão encerrada. Entre com Google.');return;
+      }
+      if(!sbSession)return;
+      if(previousUser&&previousUser!==sbSession.user.id){activeTrip=null;cloudBaseline=null;resolvedUser=null;}
+      if(event==='TOKEN_REFRESHED')setTimeout(()=>db.realtime.setAuth(sbSession?.access_token),0);
+      queueLoginResolution();
+    });
+    renderCloudStatus();
+    if(sbSession)queueLoginResolution();
+    else{
+      const err=callbackParams.get('error_description')||callbackHash.get('error_description');
+      v30ShowAuthGate(err?'Não foi possível concluir o Google: '+err:'Entre com Google para sincronizar a viagem entre os aparelhos.');
+    }
   }
+
+  document.getElementById('v32RetryTrip')?.addEventListener('click',()=>{resolvedUser=null;document.getElementById('v32RetryTrip').hidden=true;queueLoginResolution();});
 
   // Cloud settings modal
   const cloudSettings=document.getElementById('cloudSettingsBackdrop');
@@ -5483,6 +5542,7 @@ body.v30-auth-lock{overflow:hidden}
       return data;
     }catch(err){
       console.error('Google OAuth exception:',err);
+      v30SetAuthStatus('Não foi possível abrir o Google: '+err.message);
       toast('Não foi possível abrir o login Google neste navegador');
     }finally{v30AuthBusy=false;}
   }
@@ -5536,7 +5596,7 @@ body.v30-auth-lock{overflow:hidden}
     const oldText=btn?.querySelector('strong')?.textContent || 'Criar esta viagem';
     if(btn){btn.disabled=true;btn.style.opacity='.65';}
     try{
-      const {data,error}=await sb.rpc('create_shared_trip',{trip_name:'Ubatuba a Dois • 10–12/10/2026'});
+      const {data,error}=await db.rpc('create_shared_trip',{trip_name:'Ubatuba a Dois • 10–12/10/2026'});
       if(error){
         console.error('create_shared_trip:',error);
         toast('Erro ao criar viagem: '+(error.message||'ver console'));
@@ -5548,10 +5608,10 @@ body.v30-auth-lock{overflow:hidden}
         toast('Viagem criada, mas a resposta veio em formato inesperado');
         return;
       }
-      activeTrip={id:row.trip_id,code:row.invite_code};
+      cloudBaseline=null;activeTrip={id:row.trip_id,code:row.invite_code};
       saveJSON(ACTIVE_TRIP_KEY,activeTrip);
       clearPendingJoinCode();
-      await saveCloudState(true);
+      if(!await saveCloudState(true))throw new Error('Viagem criada, mas o primeiro envio do checklist falhou. Tente novamente.');
       subscribeRealtime();
       renderCloudStatus();
       renderTripModal();
@@ -5596,14 +5656,14 @@ body.v30-auth-lock{overflow:hidden}
     const btn=document.getElementById('v30CreateTrip');
     if(btn){btn.disabled=true;btn.style.opacity='.65';}
     try{
-      const {data,error}=await sb.rpc('create_shared_trip',{trip_name:'Ubatuba a Dois • 10–12/10/2026'});
+      const {data,error}=await db.rpc('create_shared_trip',{trip_name:'Ubatuba a Dois • 10–12/10/2026'});
       if(error){console.error(error);toast('Erro ao criar viagem: '+(error.message||''));return;}
       const row=Array.isArray(data)?data[0]:data;
       if(!row?.trip_id||!row?.invite_code){toast('Resposta inesperada ao criar viagem');return;}
-      activeTrip={id:row.trip_id,code:row.invite_code};saveJSON(ACTIVE_TRIP_KEY,activeTrip);
-      clearPendingJoinCode();await saveCloudState(true);subscribeRealtime();renderCloudStatus();
+      cloudBaseline=null;activeTrip={id:row.trip_id,code:row.invite_code};saveJSON(ACTIVE_TRIP_KEY,activeTrip);
+      clearPendingJoinCode();if(!await saveCloudState(true))throw new Error('A viagem foi criada, mas o checklist ainda não foi enviado. Use Tentar novamente.');subscribeRealtime();renderCloudStatus();
       v30HideTripGate();v30HideAuthGate();toast('Viagem criada • código '+row.invite_code);
-    }finally{if(btn){btn.disabled=false;btn.style.opacity='';}}
+    }catch(error){document.getElementById('v30TripGateCopy').textContent=error.message;document.getElementById('v32RetryTrip').hidden=false;resolvedUser=null;}finally{if(btn){btn.disabled=false;btn.style.opacity='';}}
   }
   document.getElementById('v30CreateTrip')?.addEventListener('click',createTripFromV30);
   document.getElementById('v30ShowJoin')?.addEventListener('click',()=>{
@@ -5612,7 +5672,7 @@ body.v30-auth-lock{overflow:hidden}
   document.getElementById('v30CancelJoin')?.addEventListener('click',()=>{document.getElementById('v30JoinBox').hidden=true;});
   document.getElementById('v30JoinTrip')?.addEventListener('click',async()=>{
     const code=document.getElementById('v30JoinCode')?.value||'';
-    const ok=await joinTripByCode(code);if(ok){v30HideTripGate();v30HideAuthGate();}
+    try{const ok=await joinTripByCode(code);if(ok){v30HideTripGate();v30HideAuthGate();}}catch(error){document.getElementById('v30TripGateCopy').textContent=error.message;document.getElementById('v32RetryTrip').hidden=false;resolvedUser=null;}
   });
   document.getElementById('v30JoinCode')?.addEventListener('keydown',e=>{
     if(e.key==='Enter')document.getElementById('v30JoinTrip')?.click();
@@ -5627,70 +5687,113 @@ body.v30-auth-lock{overflow:hidden}
       custom:safeJSON(CUSTOM_KEY,{items:{},deleted:[],overrides:{}})
     };
   }
+  function cloneState(value){return JSON.parse(JSON.stringify(value));}
+  function stateDiff(base,next,path=[],changes=[]){
+    if(JSON.stringify(base)===JSON.stringify(next))return changes;
+    if(base&&next&&typeof base==='object'&&typeof next==='object'&&!Array.isArray(base)&&!Array.isArray(next)){
+      for(const key of new Set([...Object.keys(base),...Object.keys(next)]))stateDiff(base[key],next[key],[...path,key],changes);
+    }else changes.push({path,value:next,remove:next===undefined});
+    return changes;
+  }
+  function applyChanges(target,changes){
+    target=cloneState(target);
+    for(const change of changes){
+      let node=target;
+      for(const key of change.path.slice(0,-1)){if(!node[key]||typeof node[key]!=='object')node[key]={};node=node[key];}
+      const key=change.path.at(-1);
+      if(change.remove)delete node[key];else node[key]=cloneState(change.value);
+    }
+    return target;
+  }
+  function syncContent(payload){return {app:payload.app||{},custom:payload.custom||{items:{},deleted:[],overrides:{}}};}
   function applyCloudState(payload){
     if(!payload)return;
     applyingCloud=true;
-    if(payload.app)saveJSON(APP_KEY,payload.app);
-    if(payload.custom)saveJSON(CUSTOM_KEY,payload.custom);
-    applyingCloud=false;
+    try{
+      app=cloneState(payload.app||{});app.checks=app.checks||{};app.owners=app.owners||{};
+      custom=cloneState(payload.custom||{items:{},deleted:[],overrides:{}});
+      saveJSON(APP_KEY,app);saveJSON(CUSTOM_KEY,custom);
+      checklistSection?.querySelectorAll('.check-item').forEach(el=>el.remove());
+      for(const template of checklistTemplates)template.parent.appendChild(template.node.cloneNode(true));
+      normalizeStaticItems();ensureActions();updateChecklistUI();
+      document.dispatchEvent(new CustomEvent('ubatuba:cloud-applied'));
+    }finally{applyingCloud=false;}
   }
-
   async function saveCloudState(force=false){
-    if(applyingCloud||!sb||!sbSession||!activeTrip?.id)return;
-    const payload=collectState();
-    const {error}=await sb.from('trip_state').upsert({
-      trip_id:activeTrip.id,
-      state:payload,
-      updated_by:sbSession.user.id,
-      updated_at:new Date().toISOString()
-    },{onConflict:'trip_id'});
-    if(error){
-      console.error(error);
-      if(force)toast('Não foi possível salvar na nuvem');
-    }
+    if(applyingCloud||!db||!sbSession||!activeTrip?.id)return false;
+    if(cloudSaveBusy){scheduleCloudSave();return false;}
+    cloudSaveBusy=true;
+    const tripId=activeTrip.id,userId=sbSession.user.id;
+    try{
+      const snapshot=syncContent(collectState());
+      const changes=cloudBaseline?stateDiff(cloudBaseline,snapshot):null;
+      if(changes&&!changes.length)return true;
+      for(let attempt=0;attempt<4;attempt++){
+        const {data,error}=await db.from('trip_state').select('state,updated_at').eq('trip_id',tripId).maybeSingle();
+        if(error)throw error;
+        if(activeTrip?.id!==tripId||sbSession?.user.id!==userId)return false;
+        const merged=data?.state&&changes?applyChanges(syncContent(data.state),changes):snapshot;
+        const nextTime=Math.max(Date.now(),(Date.parse(data?.updated_at)||0)+1);
+        const payload={...merged,version:32,updatedAt:new Date(nextTime).toISOString(),deviceId:deviceId()};
+        const row={trip_id:tripId,state:payload,updated_by:userId,updated_at:payload.updatedAt};
+        const result=data
+          ?await db.from('trip_state').update(row).eq('trip_id',tripId).eq('updated_at',data.updated_at).select('trip_id').maybeSingle()
+          :await db.from('trip_state').insert(row).select('trip_id').maybeSingle();
+        if(result.error){if(result.error.code==='23505')continue;throw result.error;}
+        if(!result.data)continue;
+        const laterChanges=stateDiff(snapshot,syncContent(collectState()));
+        cloudBaseline=cloneState(merged);
+        applyCloudState({...payload,...applyChanges(merged,laterChanges)});
+        if(laterChanges.length)scheduleCloudSave();
+        const status=document.getElementById('cloudTripStatus');
+        if(status)status.textContent='☁ Salvo na viagem compartilhada. Os dois podem editar o checklist.';
+        return true;
+      }
+      throw new Error('A viagem recebeu várias edições. Tentando salvar novamente.');
+    }catch(error){
+      console.error('Salvar viagem:',error);
+      document.getElementById('cloudTripStatus').textContent='Alteração salva neste aparelho; sincronização pendente: '+error.message;
+      if(force)toast('Sincronização pendente. Tente novamente.');
+      return false;
+    }finally{cloudSaveBusy=false;}
   }
   function scheduleCloudSave(){
-    if(!sbSession||!activeTrip?.id)return;
+    if(applyingCloud||!sbSession||!activeTrip?.id)return;
     clearTimeout(cloudSaveTimer);
     cloudSaveTimer=setTimeout(()=>saveCloudState(false),700);
   }
-
   document.addEventListener('ubatuba:state-changed',()=>scheduleCloudSave());
-
   async function loadCloudState(force=false){
-    if(!sb||!sbSession||!activeTrip?.id)return;
-    const {data,error}=await sb.from('trip_state').select('state,updated_at').eq('trip_id',activeTrip.id).maybeSingle();
-    if(error){console.error(error);return;}
+    if(!db||!sbSession||!activeTrip?.id)return;
+    const tripId=activeTrip.id;
+    const {data,error}=await db.from('trip_state').select('state,updated_at').eq('trip_id',tripId).maybeSingle();
+    if(error)throw new Error('Não foi possível ler o checklist compartilhado: '+error.message);
+    if(activeTrip?.id!==tripId)return;
     if(data?.state){
-      const local=collectState();
-      const cloudTime=Date.parse(data.state.updatedAt||data.updated_at||0);
-      const localTime=Date.parse(local.updatedAt||0);
-      // On explicit join/force, cloud wins. Otherwise cloud wins if it exists.
-      applyCloudState(data.state);
-      if(!sessionStorage.getItem('ubatuba-cloud-reloaded') || force){
-        sessionStorage.setItem('ubatuba-cloud-reloaded','1');
-        location.reload();
-      }
-    }else{
-      await saveCloudState(true);
-    }
+      const cloud=syncContent(data.state);
+      if(cloudSaveBusy)return;
+      const localChanges=!force&&cloudBaseline?stateDiff(cloudBaseline,syncContent(collectState())):[];
+      cloudBaseline=cloneState(cloud);
+      applyCloudState({...data.state,...applyChanges(cloud,localChanges)});
+      if(localChanges.length)scheduleCloudSave();
+    }else if(force){throw new Error('Esta viagem ainda não tem checklist compartilhado. Peça a quem criou para abrir a viagem.');}
+    else if(!await saveCloudState(true))throw new Error('Não foi possível iniciar o checklist compartilhado');
+  }
+  function subscribeRealtime(){
+    if(!db||!activeTrip?.id)return;
+    if(realtimeChannel)db.removeChannel(realtimeChannel);
+    realtimeChannel=db.channel('trip-state-'+activeTrip.id)
+      .on('postgres_changes',{event:'*',schema:'public',table:'trip_state',filter:'trip_id=eq.'+activeTrip.id},()=>{
+        loadCloudState().catch(error=>console.error('Atualizar checklist:',error));
+      }).subscribe();
+    clearInterval(cloudPollTimer);
+    cloudPollTimer=setInterval(()=>{
+      if(!document.hidden)loadCloudState().catch(error=>console.error('Atualizar checklist:',error));
+    },10000);
   }
 
-  function subscribeRealtime(){
-    if(!sb||!activeTrip?.id)return;
-    if(realtimeChannel)sb.removeChannel(realtimeChannel);
-    realtimeChannel=sb.channel('trip-state-'+activeTrip.id)
-      .on('postgres_changes',{
-        event:'UPDATE',schema:'public',table:'trip_state',filter:'trip_id=eq.'+activeTrip.id
-      },payload=>{
-        const state=payload.new?.state;
-        if(!state||state.deviceId===deviceId())return;
-        applyCloudState(state);
-        toast('Atualização recebida do outro aparelho');
-        setTimeout(()=>location.reload(),650);
-      })
-      .subscribe();
-  }
+  document.addEventListener('input',e=>{if(e.target.matches('.expense-input'))scheduleCloudSave();});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&sbSession&&activeTrip?.id)loadCloudState().catch(console.error);});
 
   // Save cloud when any relevant app UI changes.
   document.addEventListener('change',e=>{
@@ -5706,7 +5809,7 @@ body.v30-auth-lock{overflow:hidden}
   if(localStorage.getItem(OFFLINE_MODE_KEY)!=='1')v30ShowAuthGate('Verificando sua sessão Google…');
   initSupabase().catch(err=>{
     console.error(err);
-    v30ShowAuthGate('Não foi possível iniciar a sincronização. Tente recarregar a página.');
+    v30ShowAuthGate('Não foi possível iniciar a sincronização: '+err.message+'. Tente recarregar a página.');
   });
 })();
 </script><div class="market-modal-backdrop" hidden="" id="marketEditorBackdrop"><div aria-modal="true" class="market-modal" role="dialog"><h3 id="marketEditorTitle">Adicionar item ao mercado</h3><p id="marketEditorCopy">Digite o item que vocês querem incluir na compra.</p><input autocomplete="off" id="marketEditorText" maxlength="140" placeholder="Ex.: protetor solar, refrigerante, queijo..." type="text"/><div class="market-modal-actions"><button class="market-modal-btn" id="marketEditorCancel" type="button">Cancelar</button><button class="market-modal-btn primary" id="marketEditorSave" type="button">Adicionar</button></div></div></div></body>
