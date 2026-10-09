@@ -4886,7 +4886,7 @@ body.v30-auth-lock{overflow:hidden}
   // Não é segredo: a segurança continua nas políticas RLS do Supabase.
   const DEFAULT_SUPABASE_CONFIG={
     url:'https://ckppsebkjwsdgircxcyh.supabase.co',
-    anonKey:'sb_publishable_aLKcwfNKLNI5TzT67OzabQ_-a8lN0Mb'
+    anonKey:'sb_publishable_aLKcwtNKLNI5TzT67OzabQ_-a8IN0Mb'
   };
 
   function safeJSON(key, fallback){
@@ -5296,7 +5296,7 @@ body.v30-auth-lock{overflow:hidden}
     // O localStorage fica apenas como override avançado.
     // Em um aparelho novo, o site já conhece o projeto automaticamente.
     const saved=safeJSON(SUPABASE_CONFIG_KEY,null);
-    if(saved?.url && saved?.anonKey) return saved;
+    if(saved?.url && saved?.anonKey && saved.url.replace(/\/+$/,'')!==DEFAULT_SUPABASE_CONFIG.url) return saved;
     return DEFAULT_SUPABASE_CONFIG;
   }
   function configured(){
@@ -5462,14 +5462,6 @@ body.v30-auth-lock{overflow:hidden}
       let timer;
       return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(label+' demorou demais. Tente novamente.')),20000);})]).finally(()=>clearTimeout(timer));
     };
-    // Alguns navegadores deixam o Web Lock da sessão preso após o OAuth.
-    // Serialização por cliente mantém as operações Auth em ordem sem depender dele.
-    let authQueue=Promise.resolve();
-    const authLock=(_name,_timeout,operation)=>{
-      const result=authQueue.then(operation,operation);
-      authQueue=result.catch(()=>{});
-      return result;
-    };
     const sessionStorageAdapter={
       getItem:key=>{try{return localStorage.getItem(key);}catch{return sessionStorage.getItem(key);}},
       setItem:(key,value)=>{try{localStorage.setItem(key,value);}catch{sessionStorage.setItem(key,value);}},
@@ -5477,7 +5469,7 @@ body.v30-auth-lock{overflow:hidden}
     };
     // A sessão é gerenciada pelo cliente Auth. Dados usam o token já recebido,
     // sem chamar getSession novamente durante os eventos de autenticação.
-    sb=window.supabase.createClient(c.url,c.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'implicit',storage:sessionStorageAdapter,lock:authLock},global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(15000)})}});
+    sb=window.supabase.createClient(c.url,c.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'implicit',storage:sessionStorageAdapter},global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(15000)})}});
     db=window.supabase.createClient(c.url,c.anonKey,{
       accessToken:async()=>sbSession?.access_token||null,
       global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(15000)})}
