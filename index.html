@@ -3831,7 +3831,7 @@ body.v30-auth-lock{overflow:hidden}
 <h3>Controle durante a viagem</h3>
 <p class="section-sub">Preencha os gastos conforme forem acontecendo. O valor fica salvo neste navegador e entra no backup do roteiro.</p>
 <div class="expense-grid" id="expenseGrid">
-<label><span>Hospedagem</span><small>Planejado R$ 858</small><input class="expense-input" data-expense="hospedagem" min="0" step="0.01" type="number" value="858"/></label>
+<label><span>Hospedagem</span><small>Já pago • R$ 858</small><input class="expense-input" data-expense="hospedagem" min="0" step="0.01" type="number" value="858"/></label>
 <label><span>Combustível</span><small>Meta R$ 560</small><input class="expense-input" data-expense="combustivel" min="0" step="0.01" type="number"/></label>
 <label><span>Pedágios</span><small>Meta R$ 80</small><input class="expense-input" data-expense="pedagios" min="0" step="0.01" type="number"/></label>
 <label><span>TPA</span><small>Meta R$ 41</small><input class="expense-input" data-expense="tpa" min="0" step="0.01" type="number"/></label>
@@ -4338,6 +4338,7 @@ body.v30-auth-lock{overflow:hidden}
     state.market=state.market||{};state.marketItems=state.marketItems||{};
     state.marketDeleted=state.marketDeleted||[];state.marketEdits=state.marketEdits||{};
     state.stops=state.stops||{};state.favs=state.favs||{};state.expenses=state.expenses||{};
+    if(state.expenses.hospedagem==null || state.expenses.hospedagem==='')state.expenses.hospedagem=858;
     marketList.innerHTML=marketTemplate;
     applyMarketStructure();updateMarket();
     stopChecks.forEach(input=>{input.checked=!!state.stops[input.dataset.stop];});
@@ -4353,7 +4354,8 @@ body.v30-auth-lock{overflow:hidden}
   state.stops=state.stops||{};
   state.favs=state.favs||{};
   state.owners=state.owners||{};
-  state.expenses=state.expenses||{hospedagem:858};
+  state.expenses=state.expenses||{};
+  if(state.expenses.hospedagem==null || state.expenses.hospedagem==='')state.expenses.hospedagem=858;
 
   // Checklist
   const checkInputs=[...document.querySelectorAll('input[data-pack]')];
